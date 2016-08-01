@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "storage.proto";
+
+package forgre.transit;
+
+message AuthRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    string token = 1;
+}
+
+
+message UserRequest {
+    uint64 user_id = 1;
+}
+
+message UserResponse {
+    forgre.storage.User user = 1;
+}
+
+message CreateUserRequest {
+}
+
+message CreateUserResponse {
+    bool success = 1;
+    forgre.storage.User user = 2;
+}
+
+message UpdateUserResponse {
+    bool success = 1;
+    forgre.storage.User user = 2;
+}
+
+service StorageService {
+    rpc get_token(AuthRequest) returns (AuthResponse);
+
+    // User methods
+    rpc create_user(CreateUserRequest) returns (CreateUserResponse);
+    rpc get_user(UserRequest) returns (UserResponse);
+    rpc update_user(forgre.storage.User) returns (UpdateUserResponse);
+}
