@@ -1,0 +1,37 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package pd.model;
+
+message User {
+    /**
+     * Some form of ID for the user that is unique across the system, this is
+     * what should be used to refer to a user.
+     */
+    uint64 id = 1;
+    Balance balance = 2;
+    repeated Regular regulars = 3;
+}
+
+message Balance {
+    double available_pd = 1;
+    double total_pd = 2;
+}
+
+message Regular {
+    uint64 id = 1;
+    string name = 2;
+    string description = 3;
+    uint32 weight = 4; // The reward for a regular is regular.weight/sum(r.weight for r in todays_regulars)
+    Schedule schedule = 5;
+
+    message Schedule {
+        repeated Pattern pattern = 1;
+        bool inverted = 2;
+
+        message Pattern {
+            uint64 every = 1; // Happens every n days
+            google.protobuf.Timestamp starts = 2; // Timestamp in the day it starts
+        }
+    }
+}

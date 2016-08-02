@@ -8,7 +8,7 @@ from os import path
 
 import grpc
 
-from perfectday import model, storage_pb2, transit_pb2
+from perfectday import model, model_pb2, transit_pb2
 
 
 class FileStore(model.BaseStore):
@@ -45,14 +45,13 @@ class FileStore(model.BaseStore):
         FileStore.ensure_directory(userdir)
 
     def _get_user_proto(self, uid):
-        self._prepare_user_dir(uid)
         return path.join(self.users_base, str(uid), self._USER_PROTO)
 
     # ===============================
     # abstract method implementations
     # ===============================
     def read_user(self, uid):
-        user_proto = storage_pb2.User()
+        user_proto = model_pb2.User()
         with open(self._get_user_proto(uid), 'rb') as pb:
             user_proto.ParseFromString(pb.read())
         return user_proto
@@ -62,8 +61,11 @@ class FileStore(model.BaseStore):
             pb.write(proto.SerializeToString())
 
     def create_user(self):
-        proto = storage_pb2.User()
+        proto = model_pb2.User()
         proto.id = 1  # TODO: Create users with incrementing ids
+
+        self._prepare_user_dir(proto.id)
+
         self.write_user(proto)
         return proto
 
@@ -71,7 +73,15 @@ class FileStore(model.BaseStore):
 class StorageService(transit_pb2.BetaStorageServiceServicer):
     def get_user(self, request, context):
         user = model.User.from_id(request.user_id)
-        return transit_pb2.UserResponse(user=user.proto)
+        return transit_pb2.GetUserResponse(user=user.proto)
+
+    def create_user(self, request, context):
+        user = model.User.create()
+        return transit_pb2.CreateUserResponse(user=user.proto)
+
+    def update_user(self, request, context):
+        model.User(request.user).save()
+        return transit_pb2.UpdateUserResponse()
 
 
 def main():

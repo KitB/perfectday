@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "storage.proto";
+import "model.proto";
 
-package forgre.transit;
+package pd.transit;
 
 message AuthRequest {
     string username = 1;
@@ -14,25 +14,30 @@ message AuthResponse {
 }
 
 
-message UserRequest {
-    uint64 user_id = 1;
+message GetUserRequest {
+    string token = 1;
+    uint64 user_id = 2;
 }
 
-message UserResponse {
-    forgre.storage.User user = 1;
+message GetUserResponse {
+    pd.model.User user = 1;
 }
 
 message CreateUserRequest {
+    string token = 1;
 }
 
 message CreateUserResponse {
-    bool success = 1;
-    forgre.storage.User user = 2;
+    pd.model.User user = 1;
+}
+
+message UpdateUserRequest {
+    string token = 1;
+    pd.model.User user = 2;
 }
 
 message UpdateUserResponse {
-    bool success = 1;
-    forgre.storage.User user = 2;
+    pd.model.User user = 1;
 }
 
 service StorageService {
@@ -40,6 +45,6 @@ service StorageService {
 
     // User methods
     rpc create_user(CreateUserRequest) returns (CreateUserResponse);
-    rpc get_user(UserRequest) returns (UserResponse);
-    rpc update_user(forgre.storage.User) returns (UpdateUserResponse);
+    rpc get_user(GetUserRequest) returns (GetUserResponse);
+    rpc update_user(UpdateUserRequest) returns (UpdateUserResponse);
 }
