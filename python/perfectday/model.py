@@ -23,6 +23,23 @@ class BaseStore(object):
         """ Returns the created protobuf. """
         pass
 
+    @abc.abstractmethod
+    def create_regular(self, user_id):
+        """ Must be creating a regular for a user, they can't exist without.
+
+        Returns the created protobuf.
+        """
+        pass
+
+    @abc.abstractmethod
+    def read_regulars(self, user_id):
+        """ Returns a protobuf with a repeating field, probably. """
+        pass
+
+    @abc.abstractmethod
+    def write_regular(self, user_id, regular):
+        pass
+
 
 def _indent(s):
     return '\n'.join('    ' + line for line in str(s).splitlines())
