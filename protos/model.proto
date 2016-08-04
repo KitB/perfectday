@@ -8,7 +8,7 @@ message User {
      * Some form of ID for the user that is unique across the system, this is
      * what should be used to refer to a user.
      */
-    uint64 id = 1;
+    string id = 1;
     Balance balance = 2;
     repeated Regular regulars = 3;
 }

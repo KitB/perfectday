@@ -16,7 +16,7 @@ message AuthResponse {
 
 message GetUserRequest {
     string token = 1;
-    uint64 user_id = 2;
+    string user_id = 2;
 }
 
 message GetUserResponse {

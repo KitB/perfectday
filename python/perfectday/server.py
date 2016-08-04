@@ -5,6 +5,7 @@
 import os
 from concurrent import futures
 from os import path
+import uuid
 
 import grpc
 
@@ -57,12 +58,13 @@ class FileStore(model.BaseStore):
         return user_proto
 
     def write_user(self, proto):
+        # TODO: make sure this user *doesn't* exist already
         with open(self._get_user_proto(proto.id), 'wb') as pb:
             pb.write(proto.SerializeToString())
 
     def create_user(self):
         proto = model_pb2.User()
-        proto.id = 1  # TODO: Create users with incrementing ids
+        proto.id = uuid.uuid4().hex
 
         self._prepare_user_dir(proto.id)
 
