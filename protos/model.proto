@@ -1,3 +1,6 @@
+/**
+ * The somewhat abstract models of objects in the system, model.proto defines things as they are *now*.
+ */
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
