@@ -8,23 +8,33 @@ import abc
 class BaseStore(object):
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
-    def read_user(self, user_id):
-        """ Returns the protobuf for the given user. """
-        pass
-
-    @abc.abstractmethod
-    def write_user(self, proto):
-        """ Saves the given protobuf. """
-        pass
-
+    # =========================================================================
+    # User CRUD
+    # =========================================================================
     @abc.abstractmethod
     def create_user(self):
         """ Returns the created protobuf. """
         pass
 
     @abc.abstractmethod
-    def create_regular(self, user_id):
+    def read_user(self, user_id):
+        """ Returns the protobuf for the given user. """
+        pass
+
+    @abc.abstractmethod
+    def update_user(self, proto):
+        """ Saves the given protobuf. """
+        pass
+
+    @abc.abstractmethod
+    def delete_user(self, user_id):
+        pass
+
+    # =========================================================================
+    # Regular Moment CRUD
+    # =========================================================================
+    @abc.abstractmethod
+    def create_regular_moment(self, user_id):
         """ Must be creating a regular for a user, they can't exist without.
 
         Returns the created protobuf.
@@ -32,12 +42,16 @@ class BaseStore(object):
         pass
 
     @abc.abstractmethod
-    def read_regulars(self, user_id):
-        """ Returns a protobuf with a repeating field, probably. """
+    def read_regular_moment(self, regular_uuid):
         pass
 
     @abc.abstractmethod
-    def write_regular(self, user_id, regular):
+    def update_regular_moment(self, regular_proto):
+        """ Get the moment by regular_proto.uuid, merge in regular_proto, save """
+        pass
+
+    @abc.abstractmethod
+    def delete_regular_moment(self, regular_uuid):
         pass
 
 

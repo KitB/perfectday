@@ -37,7 +37,31 @@ message UpdateUserRequest {
 }
 
 message UpdateUserResponse {
-    pd.model.User user = 1;
+}
+
+message CreateRegularRequest {
+    string token = 1;
+}
+
+message CreateRegularResponse {
+    pd.model.Regular regular = 1;
+}
+
+message GetRegularRequest {
+    string token = 1;
+    string uuid = 2;
+}
+
+message GetRegularResponse {
+    pd.model.Regular regular = 1;
+}
+
+message UpdateRegularRequest {
+    // We'll make changes to the regular given by its uuid
+    pd.model.Regular regular = 1;
+}
+
+message UpdateRegularResponse {
 }
 
 service StorageService {
@@ -47,4 +71,9 @@ service StorageService {
     rpc create_user(CreateUserRequest) returns (CreateUserResponse);
     rpc get_user(GetUserRequest) returns (GetUserResponse);
     rpc update_user(UpdateUserRequest) returns (UpdateUserResponse);
+
+    // Regular methods
+    rpc create_regular(CreateRegularRequest) returns (CreateRegularResponse);
+    rpc get_regular(GetRegularRequest) returns (GetRegularResponse);
+    rpc update_regular(UpdateRegularRequest) returns (UpdateRegularResponse);
 }
