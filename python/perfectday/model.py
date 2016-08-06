@@ -91,7 +91,7 @@ class User(BaseStorable):
 
     @classmethod
     def _write_method(cls, proto):
-        return cls.store.write_user(proto)
+        return cls.store.update_user(proto)
 
 
 def main():
