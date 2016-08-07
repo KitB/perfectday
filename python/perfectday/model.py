@@ -80,7 +80,7 @@ class BaseStorable(object):
 
 class User(BaseStorable):
     @classmethod
-    def from_id(cls, uid):
+    def read(cls, uid):
         user_proto = cls.store.read_user(uid)
         return cls(user_proto)
 
@@ -92,6 +92,28 @@ class User(BaseStorable):
     @classmethod
     def _write_method(cls, proto):
         return cls.store.update_user(proto)
+
+
+class RegularMoment(BaseStorable):
+    @classmethod
+    def read(cls, user_id, series, timestamp):
+        return cls(
+            cls.store.read_regular_moment(
+                user_id, series, timestamp
+            )
+        )
+
+    @classmethod
+    def create(cls, user_id, series):
+        return cls(
+            cls.store.create_regular_moment(
+                user_id, series
+            )
+        )
+
+    @classmethod
+    def _write_method(cls, user_id, proto):
+        return cls.store.update_regular_moment(user_id, proto)
 
 
 def main():

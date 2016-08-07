@@ -36,6 +36,9 @@ class _PathGen(object):
             result.__module__ = sys._getframe(1).f_globals.get('__name__', '__main__')
         except (AttributeError, ValueError):
             pass
+
+        result.__generated_code__ = self.code
+        del self.code
         return result
 
     def _generate_code(self, cls):
@@ -51,7 +54,7 @@ class _PathGen(object):
             .format(cls.__name__)
         )
         found_paths = False
-        for k, v in cls.__dict__.iteritems():
+        for k, v in sorted(cls.__dict__.iteritems()):
             found_paths = True
             if k.endswith(self.PATH_SUFFIX):
                 self._gen_for_path(k, v)
@@ -150,7 +153,7 @@ class _PathGen(object):
             '        return None\n'
             '\n'
             'def _read{path_name}({self_c_args}):\n'
-            '    return open(self._get{path_attribute}({c_args}, \'rb\'))\n'
+            '    return open(self._get{path_attribute}({c_args}), \'rb\')\n'
             '\n'
             'def _update{path_name}({self_c_args}):\n'
             '    path = self._get{path_attribute}({c_args})\n'

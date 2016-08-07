@@ -8,18 +8,22 @@ import uuid
 
 import grpc
 
-from perfectday import model, model_pb2, transit_pb2, _pathgen
+from perfectday import model, history_pb2, model_pb2, storage_pb2, transit_pb2, _pathgen
 
 
 @_pathgen.pathgen
 class _PathsBase(object):
     _USERS_BASE_PATH = 'users'
+
     _USER_BASE_PATH = path.join(_USERS_BASE_PATH, '{user_id}')
     _USER_PROTO_PATH = path.join(_USER_BASE_PATH, 'user.pb')
     _USER_META_PATH = path.join(_USER_BASE_PATH, 'meta.pb')
-    _REGULARS_BASE_PATH = path.join(_USER_BASE_PATH, 'regulars')
-    _REGULAR_BASE_PATH = path.join(_REGULARS_BASE_PATH, '{regular_id}')
-    _REGULAR_PROTO_PATH = path.join(_REGULARS_BASE_PATH, '{seconds}_{nanos}.pb')
+
+    _REGULAR_MOMENTS_BASE_PATH = path.join(_USER_BASE_PATH, 'regular_moments')
+    _REGULAR_MOMENTS_META_PATH = path.join(_REGULAR_MOMENTS_BASE_PATH, 'meta.pb')
+
+    _REGULAR_MOMENT_BASE_PATH = path.join(_REGULAR_MOMENTS_BASE_PATH, '{regular_series}')
+    _REGULAR_MOMENT_PROTO_PATH = path.join(_REGULAR_MOMENT_BASE_PATH, '{seconds}_{nanos}.pb')
 
 
 class FileStore(model.BaseStore, _PathsBase):
@@ -39,6 +43,20 @@ class FileStore(model.BaseStore, _PathsBase):
     def _prepare_user_dir(self, user_id):
         self._ensure_user_base(user_id)
 
+    def _get_next_regular_series(self, user_id):
+        # TODO: Make meta reading threadsafe
+        with self._read_regulars_meta(user_id) as pb:
+            regulars_meta = storage_pb2.RegularMeta.FromString(pb.read())
+        last_series = regulars_meta.last_series
+
+        next_series = last_series + 1
+        regulars_meta.last_series = next_series
+
+        with self._update_regulars_meta(self, user_id) as pb:
+            pb.write(regulars_meta.SerializeToString())
+
+        return next_series
+
     # ===============================
     # abstract method implementations
     # ===============================
@@ -49,46 +67,75 @@ class FileStore(model.BaseStore, _PathsBase):
         return user_proto
 
     def update_user(self, proto):
-        with self._update_user_proto(proto.id) as pb:
+        with self._update_user_proto(proto.uuid) as pb:
             pb.write(proto.SerializeToString())
 
     def create_user(self):
         proto = model_pb2.User()
 
         # TODO: Make sure this user doesn't already exist
-        proto.id = uuid.uuid4().hex
+        proto.uuid = uuid.uuid4().hex
 
-        self._prepare_user_dir(proto.id)
+        self._prepare_user_dir(proto.uuid)
 
-        with self._create_user_proto(proto.id) as pb:
+        with self._create_user_proto(proto.uuid) as pb:
             pb.write(proto.SerializeToString())
         return proto
 
     def delete_user(self, user_id):
         self._delete_user_proto(user_id)
 
-    def create_regular_moment(self, user_id):
-        user = self.read_user(self, user_id)
-        regular = user.regulars.add()
-        regular.id = 1  # TODO: generate ids for regulars
+    def create_regular_moment(self, user_id, regular_series):
+        # don't need to pass in timestamp, we're generating it here
 
-        self.write_regular(user_id, regular)
-        return regular
+        self._ensure_regular_moment_base(user_id, regular_series)
 
-    def update_regular_moment(self, user_id, regular):
-        pass
+        regular_moment = history_pb2.RegularMoment()
+        regular_moment.regular.series = regular_series
+        regular_moment.timestamp.GetCurrentTime()
 
-    def read_regular_moment(self):
-        pass
+        seconds = regular_moment.timestamp.seconds
+        nanos = regular_moment.timestamp.nanos
 
-    def delete_regular_moment(self):
-        pass
+        with self._create_regular_moment_proto(user_id, regular_series, seconds, nanos) as pb:
+            pb.write(regular_moment.SerializeToString())
+
+        return regular_moment
+
+    def update_regular_moment(self, user_id, proto):
+        args = [
+            user_id,
+            proto.regular.series,
+            proto.timestamp.seconds,
+            proto.timestamp.nanos
+        ]
+        with self._update_regular_moment_proto(*args) as pb:
+            pb.write(proto.SerializeToString())
+
+    def read_regular_moment(self, user_id, series, timestamp):
+        args = [
+            user_id,
+            series,
+            timestamp.seconds,
+            timestamp.nanos
+        ]
+        with self._read_regular_moment_proto(*args) as pb:
+            return history_pb2.RegularMoment.FromString(pb.read())
+
+    def delete_regular_moment(self, user_id, series, timestamp):
+        args = [
+            user_id,
+            series,
+            timestamp.seconds,
+            timestamp.nanos
+        ]
+        self._delete_regular_moment_proto(*args)
 
 
 class StorageService(transit_pb2.BetaStorageServiceServicer):
-    def get_user(self, request, context):
-        user = model.User.from_id(request.user_id)
-        return transit_pb2.GetUserResponse(user=user.proto)
+    def read_user(self, request, context):
+        user = model.User.read(request.user_id)
+        return transit_pb2.ReadUserResponse(user=user.proto)
 
     def create_user(self, request, context):
         user = model.User.create()
@@ -97,6 +144,18 @@ class StorageService(transit_pb2.BetaStorageServiceServicer):
     def update_user(self, request, context):
         model.User(request.user).save()
         return transit_pb2.UpdateUserResponse()
+
+    def read_regular_moment(self, request, context):
+        regular_moment = model.RegularMoment.read(request.user_id, request.series, request.timestamp)
+        return transit_pb2.ReadRegularMomentResponse(moment=regular_moment.proto)
+
+    def create_regular_moment(self, request, context):
+        regular_moment = model.RegularMoment.create(request.user_id, request.series)
+        return transit_pb2.CreateRegularMomentResponse(moment=regular_moment.proto)
+
+    def update_regular_moment(self, request, context):
+        model.RegularMoment(request.moment).save()
+        return transit_pb2.UpdateRegularMomentResponse()
 
 
 def main():

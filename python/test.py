@@ -13,9 +13,9 @@ def fill_test_user(proto):
     b.available_pd = 3.4
 
     r = p.regulars.add()
-    r.id = 1
+    r.series = 1
     r.name = "Something"
-    r.description = "Thingy thing thing"
+    r.note = "Thingy thing thing"
     r.weight = 2
 
     r.schedule.inverted = False
@@ -25,9 +25,9 @@ def fill_test_user(proto):
     pa.starts.GetCurrentTime()
 
     r = p.regulars.add()
-    r.id = 2
+    r.series = 2
     r.name = "Some other thing"
-    r.description = "Plinky ploink"
+    r.note = "Plinky ploink"
     r.weight = 1
 
     pa = r.schedule.pattern.add()

@@ -1,6 +1,9 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 import "model.proto";
+import "history.proto";
 
 package pd.transit;
 
@@ -14,12 +17,12 @@ message AuthResponse {
 }
 
 
-message GetUserRequest {
+message ReadUserRequest {
     string token = 1;
     string user_id = 2;
 }
 
-message GetUserResponse {
+message ReadUserResponse {
     pd.model.User user = 1;
 }
 
@@ -39,29 +42,34 @@ message UpdateUserRequest {
 message UpdateUserResponse {
 }
 
-message CreateRegularRequest {
+message CreateRegularMomentRequest {
     string token = 1;
+    string user_id = 2;
+    uint32 series = 3;
 }
 
-message CreateRegularResponse {
-    pd.model.Regular regular = 1;
+message CreateRegularMomentResponse {
+    pd.history.RegularMoment moment = 1;
 }
 
-message GetRegularRequest {
+message ReadRegularMomentRequest {
     string token = 1;
-    string uuid = 2;
+    string user_id = 2;
+    uint32 series = 3;
+    google.protobuf.Timestamp timestamp = 4;
 }
 
-message GetRegularResponse {
-    pd.model.Regular regular = 1;
+message ReadRegularMomentResponse {
+    pd.history.RegularMoment moment = 1;
 }
 
-message UpdateRegularRequest {
-    // We'll make changes to the regular given by its uuid
-    pd.model.Regular regular = 1;
+message UpdateRegularMomentRequest {
+    string token = 1;
+    string user_id = 2;
+    pd.history.RegularMoment moment = 3;
 }
 
-message UpdateRegularResponse {
+message UpdateRegularMomentResponse {
 }
 
 service StorageService {
@@ -69,11 +77,11 @@ service StorageService {
 
     // User methods
     rpc create_user(CreateUserRequest) returns (CreateUserResponse);
-    rpc get_user(GetUserRequest) returns (GetUserResponse);
+    rpc read_user(ReadUserRequest) returns (ReadUserResponse);
     rpc update_user(UpdateUserRequest) returns (UpdateUserResponse);
 
     // Regular methods
-    rpc create_regular(CreateRegularRequest) returns (CreateRegularResponse);
-    rpc get_regular(GetRegularRequest) returns (GetRegularResponse);
-    rpc update_regular(UpdateRegularRequest) returns (UpdateRegularResponse);
+    rpc create_regular_moment(CreateRegularMomentRequest) returns (CreateRegularMomentResponse);
+    rpc read_regular_moment(ReadRegularMomentRequest) returns (ReadRegularMomentResponse);
+    rpc update_regular_moment(UpdateRegularMomentRequest) returns (UpdateRegularMomentResponse);
 }
