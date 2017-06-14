@@ -1,4 +1,0 @@
-grpcio==1.0.0rc1
-grpcio-tools==1.0.0rc1
-ipython
-flake8
