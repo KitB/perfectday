@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
 from pony import orm
 
 from . import _constants
@@ -10,6 +9,9 @@ session = orm.db_session
 
 
 # IMPORTANT: These models are to be record classes only - all processing will be done with wrapper classes
+
+# We store dates as integer days from an epoch
+int_date = int
 
 
 class User(db.Entity):
@@ -23,7 +25,7 @@ class User(db.Entity):
 class Token(db.Entity):
     user = orm.Required(User)
     slug = orm.Required(str, _constants.TOKEN_BYTES * 2)  # hex string
-    expires = orm.Required(datetime)
+    expires = orm.Required(int_date)
 
 
 class Habit(db.Entity):
@@ -38,9 +40,9 @@ class Habit(db.Entity):
 class Regular(db.Entity):
     """ The important part of a habit, distinct because it is mutable but needs to be stored immutably. """
     habit = orm.Required(Habit)
-    start = orm.Required(datetime)
-    period = orm.Required(timedelta)
-    stop = orm.Optional(datetime)
+    start = orm.Required(int_date)
+    period = orm.Required(int)  # int days
+    stop = orm.Optional(int_date)
     weight = orm.Required(float)
 
 
@@ -48,7 +50,7 @@ class Action(db.Entity):
     """ Indicates that a user did the thing associated with a habit on a specified date. """
     user = orm.Required(User)
     habit = orm.Required(Habit)
-    when = orm.Required(datetime)
+    when = orm.Required(int_date)
 
 
 def connect_db(dbpath):
