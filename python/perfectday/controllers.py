@@ -8,6 +8,10 @@ def clean_date(dat):
     return dt.datetime(*dat.timetuple()[:3])
 
 
+def dt_today():
+    return clean_date(dt.datetime.now())
+
+
 def clean_dates(kwargs):
     """ Cleans dates in a dict. """
     def _clean_date(thing):
@@ -58,6 +62,19 @@ class Controller:
     def __repr__(self):
         return f'{self.__class__.__name__}{self._as_dict()}'
 
+    # automatic setters and getters for model values
+    def __getattr__(self, name):
+        if name in self._model._columns_:
+            return getattr(self._model, name)
+
+    def __setattr__(self, name, value):
+        if name == '_model':
+            object.__setattr__(self, name, value)
+        elif name in self._model._columns_:
+            setattr(self._model, name, value)
+        else:
+            object.__setattr__(self, name, value)
+
 
 def _controllers_to_models(some_dict):
     """ Find any controller instances in the given dict and pull out their model instances. """
@@ -69,6 +86,30 @@ def _controllers_to_models(some_dict):
     return {key: convert(val) for (key, val) in some_dict.items()}
 
 
+class Metadata(Controller):
+    model = models.Metadata
+
+    @classmethod
+    def create(cls):
+        raise NotImplementedError('Don\'t try to create the metadata, there can only be one')
+
+    @classmethod
+    def get(cls):
+        return cls(models.Metadata[1])
+
+    @classmethod
+    def get_or_create(cls):
+        try:
+            return cls.get()
+        except models.orm.ObjectNotFound:
+            m = models.Metadata(start_date=dt_today())
+            return cls(m)
+
+    @property
+    def now(self):
+        return (dt_today() - self.start_date).days
+
+
 class User(Controller):
     model = models.User
 
@@ -78,8 +119,30 @@ class User(Controller):
             yield Habit(h)
 
     def calculate_worth(self):
-        for habit in self.habits:
-            pass
+        habits = list(self.habits)
+        for habit in habits:
+            habit.cache_req_dates = habit.required_dates()
+            habit.cache_hap_dates = habit.happened_dates()
+
+        total = 0
+        for day in range(self.created, Metadata.get().now):
+            total += _calc_worth(day, habits)
+
+        return total
+
+
+
+def _calc_worth(day, habits):
+    relevant_habits = [habit for habit in habits if day in habit.cache_req_dates]
+    happened_habits = [habit for habit in habits
+                       if day in habit.cache_hap_dates & habit.cache_req_dates]
+
+    total_weight = sum([habit.get_weight_on(day) for habit in relevant_habits])
+    happened_weight = sum([habit.get_weight_on(day) for habit in happened_habits])
+
+    if total_weight == 0:
+        return 0
+    return (happened_weight / total_weight)
 
 
 class Token(Controller):
@@ -105,13 +168,21 @@ class Habit(Controller):
     def happened_dates(self):
         return set(action.when for action in self.actions)
 
+    def get_regular_on(self, day):
+        for regular in self.regulars:
+            if regular.start <= day < regular.stop:
+                return regular
+
+    def get_weight_on(self, day):
+        return self.get_regular_on(day).weight
+
 
 class Regular(Controller):
     model = models.Regular
 
     @property
     def stop(self):
-        default = dt.datetime.today()
+        default = Metadata.get().now
         try:
             return self._model.stop or default
         except AttributeError:

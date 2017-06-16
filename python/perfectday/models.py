@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from pony import orm
 
 from . import _constants
@@ -14,12 +15,16 @@ session = orm.db_session
 int_date = int
 
 
+class Metadata(db.Entity):
+    start_date = orm.Required(datetime)
+
+
 class User(db.Entity):
     name = orm.PrimaryKey(str)
     password = orm.Required(str, 60)
     tokens = orm.Set('Token')
     habits = orm.Set('Habit')
-    actions = orm.Set('Action')
+    created = orm.Required(int_date)
 
 
 class Token(db.Entity):
@@ -48,7 +53,6 @@ class Regular(db.Entity):
 
 class Action(db.Entity):
     """ Indicates that a user did the thing associated with a habit on a specified date. """
-    user = orm.Required(User)
     habit = orm.Required(Habit)
     when = orm.Required(int_date)
 
