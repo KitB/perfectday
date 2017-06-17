@@ -118,31 +118,31 @@ class User(Controller):
         for h in self._model.habits:
             yield Habit(h)
 
-    def calculate_worth(self):
-        habits = list(self.habits)
-        for habit in habits:
-            habit.cache_req_dates = habit.required_dates()
-            habit.cache_hap_dates = habit.happened_dates()
+    def recache_dates(self):
+        self._cache_habits = list(self.habits)
+        for habit in self._cache_habits:
+            habit._cache_req_dates = habit.required_dates()
+            habit._cache_hap_dates = habit.happened_dates()
 
+    def calculate_worth(self):
         total = 0
         for day in range(self.created, Metadata.get().now):
-            total += _calc_worth(day, habits)
+            total += self.calculate_day_worth(day)
 
         return total
 
+    def calculate_day_worth(self, day):
+        habits = self._cache_habits
+        relevant_habits = [habit for habit in habits if day in habit._cache_req_dates]
+        happened_habits = [habit for habit in habits
+                           if day in habit._cache_hap_dates & habit._cache_req_dates]
 
+        total_weight = sum([habit.get_weight_on(day) for habit in relevant_habits])
+        happened_weight = sum([habit.get_weight_on(day) for habit in happened_habits])
 
-def _calc_worth(day, habits):
-    relevant_habits = [habit for habit in habits if day in habit.cache_req_dates]
-    happened_habits = [habit for habit in habits
-                       if day in habit.cache_hap_dates & habit.cache_req_dates]
-
-    total_weight = sum([habit.get_weight_on(day) for habit in relevant_habits])
-    happened_weight = sum([habit.get_weight_on(day) for habit in happened_habits])
-
-    if total_weight == 0:
-        return 0
-    return (happened_weight / total_weight)
+        if total_weight == 0:
+            return 0
+        return (happened_weight / total_weight)
 
 
 class Token(Controller):
