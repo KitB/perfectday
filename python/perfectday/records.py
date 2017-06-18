@@ -43,8 +43,8 @@ class Metadata(db.Entity):
 #     polyamorous relationships, genuinely about code)
 # ==================================================================
 class User(db.Entity):
-    name = orm.PrimaryKey(str)
-    password = orm.Required(str, 60)
+    name = orm.PrimaryKey(str)  # TODO: consider leaving this as just a unique attribute
+    password = orm.Required(str, 160)
     created = orm.Required(int_date)
     tokens = orm.Set('Token')
     habits = orm.Set('Habit')
@@ -54,7 +54,7 @@ class User(db.Entity):
 class Token(db.Entity):
     user = orm.Required(User)
     slug = orm.Required(str, _constants.TOKEN_BYTES * 2)  # hex string
-    expires = orm.Required(int_date)
+    expires = orm.Required(datetime)
 # ==================================================================
 
 

@@ -1,11 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Where the records are *purely* record types, these add surrounding logic that is still grounded in
+the immutable model as they are stored in the database. In contrast the controllers provide a
+mutable-looking interface over these.
+
+This is the furthest away from records.py that a module should be importing or interacting with the
+ORM. I will not be surprised if it happens in a few places and will commit such code with the
+proviso that the necessary functionality eventually be written into this module so that ORM can be
+removed from others.
+
+These are pretty messy at the moment; I hope to clean them up in future.
+"""
 import datetime as dt
 from textwrap import dedent
 
 from pony import orm
 
-from . import records
+from . import errors, records
 
 
 def clean_date(dat):
@@ -14,6 +26,14 @@ def clean_date(dat):
 
 def dt_today():
     return clean_date(dt.datetime.now())
+
+
+def get_new_metadata_date():
+    return start_of_week(dt_today())
+
+
+def start_of_week(date):
+    return date - dt.timedelta(days=date.weekday())
 
 
 def clean_dates(kwargs):
@@ -30,68 +50,75 @@ class Model:
     @classmethod
     def create(cls, **kwargs):
         kwargs = _models_to_records(kwargs)
-        r = cls.record(**kwargs)
+        r = cls._record(**kwargs)
+        records.db.commit()
         return cls(r)
 
     @classmethod
     def get(cls, **kwargs):
         kwargs = _models_to_records(kwargs)
-        r = cls.record.get(**kwargs)
+        r = cls._record.get(**kwargs)
         if r is None:
-            raise ValueError  # TODO: replace with some kind of NotFoundError
+            raise errors.NoSuchRecordError(f'{cls.__name__} not found: {kwargs}')
         return cls(r)
 
     @classmethod
     def get_or_create(cls, **kwargs):
         kwargs = _models_to_records(kwargs)
-        pk_arg_names = [at.name for at in cls.record._pk_attrs_]
+        pk_arg_names = [at.name for at in cls._record._pk_attrs_]
         pk_args = {name: kwargs[name] for name in pk_arg_names}
-        r = cls.record.get(**pk_args)
+        r = cls._record.get(**pk_args)
         if r is None:
-            r = cls.record(**kwargs)
+            r = cls._record(**kwargs)
+            records.db.commit()
 
         return cls(r)
 
     def __init__(self, record):
         if record is None:
             raise ValueError('Cannot initialise models without record objects')
-        self._record = record
+        self.record = record
 
     def _as_dict(self):
-        return {attr.name: getattr(self._record, attr.name)
-                for attr in self.record._attrs_with_columns_}
+        return {attr.name: getattr(self.record, attr.name)
+                for attr in self._record._attrs_with_columns_}
 
     def __repr__(self):
         return f'{self.__class__.__name__}{self._as_dict()}'
 
     # automatic setters and getters for record values
     def __getattr__(self, name):
-        if name in self._record._columns_:
-            return getattr(self._record, name)
+        if name in self.record._columns_:
+            return getattr(self.record, name)
         else:
             raise AttributeError(f'{self.__class__.__name__} has no attribute {name}')
 
     def __setattr__(self, name, value):
-        if name == '_record':
+        # This method makes me deeply uncomfortable
+        if name == 'record':
             object.__setattr__(self, name, value)
-        elif name in self._record._columns_:
-            setattr(self._record, name, value)
+        elif hasattr(self, name):
+            object.__setattr__(self, name, value)
+        elif name in self.record._columns_:
+            setattr(self.record, name, value)
+            records.db.commit()
         else:
             object.__setattr__(self, name, value)
 
 
+def _model_to_record(thing):
+    if isinstance(thing, Model):
+        return thing.record
+    return thing
+
+
 def _models_to_records(some_dict):
     """ Find any model instances in the given dict and pull out their record instances. """
-    def convert(thing):
-        if isinstance(thing, Model):
-            return thing._record
-        return thing
-
-    return {key: convert(val) for (key, val) in some_dict.items()}
+    return {key: _model_to_record(val) for (key, val) in some_dict.items()}
 
 
 class Metadata(Model):
-    record = records.Metadata
+    _record = records.Metadata
 
     @classmethod
     def create(cls):
@@ -106,8 +133,17 @@ class Metadata(Model):
         try:
             return cls.get()
         except orm.ObjectNotFound:
-            r = records.Metadata(start_date=dt_today())
+            r = records.Metadata(start_date=get_new_metadata_date())
             return cls(r)
+
+    @property
+    def start_date(self):
+        return self.record.start_date
+
+    @start_date.setter
+    def start_date(self, new_date):
+        self.record.start_date = start_of_week(new_date)
+        records.db.commit()
 
     @property
     def now(self):
@@ -121,12 +157,17 @@ class Metadata(Model):
 
 
 class User(Model):
-    record = records.User
+    _record = records.User
 
     @property
     def habits(self):
-        for h in self._record.habits:
+        for h in self.record.habits:
             yield Habit(h)
+
+    @property
+    def rewards(self):
+        for r in self.record.rewards:
+            yield Reward(r)
 
     def recache_dates(self):
         self._cache_habits = list(self.habits)
@@ -167,7 +208,7 @@ class User(Model):
 
     def get_purchases(self):
         for p in orm.select(p for p in records.Purchase
-                            if p.reward.user == self._record):
+                            if p.reward.user == self.record):
             yield Purchase(p)
 
     def get_day_purchases(self, int_date):
@@ -177,13 +218,12 @@ class User(Model):
         high = low + dt.timedelta(days=1)
 
         for p in orm.select(p for p in records.Purchase
-                            if (p.reward.user == self._record)
+                            if (p.reward.user == self.record)
                             and low <= p.when
                             and p.when < high):
             yield Purchase(p)
 
     def total_purchases(self):
-        # TODO: Get someone who actually knows SQL to check this
         q = dedent("""\
         SELECT (SELECT E."cost" AS "cost"
                 FROM Reward R, RewardEpoch E
@@ -199,20 +239,37 @@ class User(Model):
 
 
 class Token(Model):
-    record = records.Token
+    _record = records.Token
+
+    @classmethod
+    def get_non_expired(cls, user, slug):
+        user = _model_to_record(user)
+        q = records.Token.select(lambda t: t.user == user
+                                 and t.slug == slug
+                                 and t.expires > dt.datetime.now()
+                                 )
+        if q.exists():
+            return q.limit(1)[0]
+        return None
 
 
 class Habit(Model):
-    record = records.Habit
+    _record = records.Habit
 
     @property
     def regulars(self):
-        for r in self._record.regulars:
+        for r in self.record.regulars:
+            yield Regular(r)
+
+    @property
+    def current_regulars(self):
+        for r in self.record.regulars.select(lambda r: r.stop is None
+                                             or r.stop > Metadata.get().now):
             yield Regular(r)
 
     @property
     def actions(self):
-        for a in self._record.actions:
+        for a in self.record.actions:
             yield Action(a)
 
     def required_dates(self):
@@ -231,33 +288,41 @@ class Habit(Model):
 
 
 class Regular(Model):
-    record = records.Regular
+    _record = records.Regular
 
     @property
     def stop(self):
         default = Metadata.get().now
         try:
-            return self._record.stop or default
+            return self.record.stop or default
         except AttributeError:
             return default
 
+    def stop_now(self):
+        self.record.stop = Metadata.get().now
+        records.db.commit()
+
     def generate_dates(self):
-        d = self._record.start
+        d = self.record.start
         while d < self.stop:
             yield d
-            d += self._record.period
+            d += self.record.period
 
 
 class Action(Model):
-    record = records.Action
+    _record = records.Action
 
 
 class Reward(Model):
-    record = records.Reward
+    _record = records.Reward
+
+    @property
+    def current_epoch(self):
+        return self.record.epochs.order_by(orm.desc(records.RewardEpoch.when)).limit(1)[0]
 
 
 class RewardEpoch(Model):
-    record = records.RewardEpoch
+    _record = records.RewardEpoch
 
     @classmethod
     def for_purchase(cls, purchase):
@@ -273,7 +338,7 @@ class RewardEpoch(Model):
 
 
 class Purchase(Model):
-    record = records.Purchase
+    _record = records.Purchase
 
     def calculate_cost(self):
         epoch = RewardEpoch.for_purchase(self)
