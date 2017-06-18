@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from perfectday import controllers as c, models as m
+from perfectday import controllers as c, records as r
 import datetime as dt
 import random
 
@@ -54,9 +54,9 @@ def populate_db():
                      weight=1)
 
     def maybe_gen(habit, when):
-        r = random.random()
-        doing = r < 0.8
-        print(f'{habit.short} on {when}? r={r:.2f}, doing: {doing}')
+        rng = random.random()
+        doing = rng < 0.8
+        print(f'{habit.short} on {when}? rng={rng:.2f}, doing: {doing}')
         if doing:
             c.Action.create(habit=habit, when=when)
 
@@ -101,16 +101,16 @@ def populate_db():
 
     for x in range(365 + 1):
         if random.random() < 0.2:
-            r = random.choice(rs)
+            reward = random.choice(rs)
             date = md.int_date_to_dt(x)
-            print(f'Purchasing {r.short} on {x}')
-            c.Purchase.create(reward=r,
+            print(f'Purchasing {reward.short} on {x}')
+            c.Purchase.create(reward=reward,
                               when=date)
 
-    m.db.commit()
+    r.db.commit()
 
 
 if __name__ == '__main__':
-    m.main()
-    with m.session:
+    r.main()
+    with r.session:
         populate_db()

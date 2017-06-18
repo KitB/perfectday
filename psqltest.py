@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
-from perfectday import models as m, controllers as c, _populate_test_data  # noqa
+from perfectday import records as r, controllers as c, _populate_test_data  # noqa
 
-m.main(['-D', 'postgres', '-u', 'kit'])
+r.main(['-D', 'postgres', '-u', 'kit'])
 
-m.session.__enter__()
+r.session.__enter__()
 
 _populate_test_data.populate_db()
 

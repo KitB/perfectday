@@ -5,7 +5,7 @@ from textwrap import dedent
 
 from pony import orm
 
-from . import models
+from . import records
 
 
 def clean_date(dat):
@@ -29,69 +29,69 @@ def clean_dates(kwargs):
 class Controller:
     @classmethod
     def create(cls, **kwargs):
-        kwargs = _controllers_to_models(kwargs)
-        m = cls.model(**kwargs)
-        return cls(m)
+        kwargs = _controllers_to_records(kwargs)
+        r = cls.record(**kwargs)
+        return cls(r)
 
     @classmethod
     def get(cls, **kwargs):
-        kwargs = _controllers_to_models(kwargs)
-        m = cls.model.get(**kwargs)
-        if m is None:
+        kwargs = _controllers_to_records(kwargs)
+        r = cls.record.get(**kwargs)
+        if r is None:
             raise ValueError  # TODO: replace with some kind of NotFoundError
-        return cls(m)
+        return cls(r)
 
     @classmethod
     def get_or_create(cls, **kwargs):
-        kwargs = _controllers_to_models(kwargs)
-        pk_arg_names = [at.name for at in cls.model._pk_attrs_]
+        kwargs = _controllers_to_records(kwargs)
+        pk_arg_names = [at.name for at in cls.record._pk_attrs_]
         pk_args = {name: kwargs[name] for name in pk_arg_names}
-        m = cls.model.get(**pk_args)
-        if m is None:
-            m = cls.model(**kwargs)
+        r = cls.record.get(**pk_args)
+        if r is None:
+            r = cls.record(**kwargs)
 
-        return cls(m)
+        return cls(r)
 
-    def __init__(self, model):
-        if model is None:
-            raise ValueError('Cannot initialise controllers without model objects')
-        self._model = model
+    def __init__(self, record):
+        if record is None:
+            raise ValueError('Cannot initialise controllers without record objects')
+        self._record = record
 
     def _as_dict(self):
-        return {attr.name: getattr(self._model, attr.name)
-                for attr in self.model._attrs_with_columns_}
+        return {attr.name: getattr(self._record, attr.name)
+                for attr in self.record._attrs_with_columns_}
 
     def __repr__(self):
         return f'{self.__class__.__name__}{self._as_dict()}'
 
-    # automatic setters and getters for model values
+    # automatic setters and getters for record values
     def __getattr__(self, name):
-        if name in self._model._columns_:
-            return getattr(self._model, name)
+        if name in self._record._columns_:
+            return getattr(self._record, name)
         else:
             raise AttributeError(f'{self.__class__.__name__} has no attribute {name}')
 
     def __setattr__(self, name, value):
-        if name == '_model':
+        if name == '_record':
             object.__setattr__(self, name, value)
-        elif name in self._model._columns_:
-            setattr(self._model, name, value)
+        elif name in self._record._columns_:
+            setattr(self._record, name, value)
         else:
             object.__setattr__(self, name, value)
 
 
-def _controllers_to_models(some_dict):
-    """ Find any controller instances in the given dict and pull out their model instances. """
+def _controllers_to_records(some_dict):
+    """ Find any controller instances in the given dict and pull out their record instances. """
     def convert(thing):
         if isinstance(thing, Controller):
-            return thing._model
+            return thing._record
         return thing
 
     return {key: convert(val) for (key, val) in some_dict.items()}
 
 
 class Metadata(Controller):
-    model = models.Metadata
+    record = records.Metadata
 
     @classmethod
     def create(cls):
@@ -99,15 +99,15 @@ class Metadata(Controller):
 
     @classmethod
     def get(cls):
-        return cls(models.Metadata[1])
+        return cls(records.Metadata[1])
 
     @classmethod
     def get_or_create(cls):
         try:
             return cls.get()
         except orm.ObjectNotFound:
-            m = models.Metadata(start_date=dt_today())
-            return cls(m)
+            r = records.Metadata(start_date=dt_today())
+            return cls(r)
 
     @property
     def now(self):
@@ -121,11 +121,11 @@ class Metadata(Controller):
 
 
 class User(Controller):
-    model = models.User
+    record = records.User
 
     @property
     def habits(self):
-        for h in self._model.habits:
+        for h in self._record.habits:
             yield Habit(h)
 
     def recache_dates(self):
@@ -166,8 +166,8 @@ class User(Controller):
         return (self.calculate_day_worth(d) for d in range(day + 1))
 
     def get_purchases(self):
-        for p in orm.select(p for p in models.Purchase
-                            if p.reward.user == self._model):
+        for p in orm.select(p for p in records.Purchase
+                            if p.reward.user == self._record):
             yield Purchase(p)
 
     def get_day_purchases(self, int_date):
@@ -176,8 +176,8 @@ class User(Controller):
         low = clean_date(dt_date)
         high = low + dt.timedelta(days=1)
 
-        for p in orm.select(p for p in models.Purchase
-                            if (p.reward.user == self._model)
+        for p in orm.select(p for p in records.Purchase
+                            if (p.reward.user == self._record)
                             and low <= p.when
                             and p.when < high):
             yield Purchase(p)
@@ -194,25 +194,25 @@ class User(Controller):
                 LIMIT 1)
         FROM Purchase P;
         """)
-        out = sum(models.db.select(q))
+        out = sum(records.db.select(q))
         return out
 
 
 class Token(Controller):
-    model = models.Token
+    record = records.Token
 
 
 class Habit(Controller):
-    model = models.Habit
+    record = records.Habit
 
     @property
     def regulars(self):
-        for r in self._model.regulars:
+        for r in self._record.regulars:
             yield Regular(r)
 
     @property
     def actions(self):
-        for a in self._model.actions:
+        for a in self._record.actions:
             yield Action(a)
 
     def required_dates(self):
@@ -231,33 +231,33 @@ class Habit(Controller):
 
 
 class Regular(Controller):
-    model = models.Regular
+    record = records.Regular
 
     @property
     def stop(self):
         default = Metadata.get().now
         try:
-            return self._model.stop or default
+            return self._record.stop or default
         except AttributeError:
             return default
 
     def generate_dates(self):
-        d = self._model.start
+        d = self._record.start
         while d < self.stop:
             yield d
-            d += self._model.period
+            d += self._record.period
 
 
 class Action(Controller):
-    model = models.Action
+    record = records.Action
 
 
 class Reward(Controller):
-    model = models.Reward
+    record = records.Reward
 
 
 class RewardEpoch(Controller):
-    model = models.RewardEpoch
+    record = records.RewardEpoch
 
     @classmethod
     def for_purchase(cls, purchase):
@@ -266,14 +266,14 @@ class RewardEpoch(Controller):
     @classmethod
     def for_reward_when(cls, reward, when):
         epoch_query = orm.select(re
-                                 for re in models.RewardEpoch
+                                 for re in records.RewardEpoch
                                  if re.reward == reward and re.when <= when)
-        epoch_model = epoch_query.order_by(orm.desc(models.RewardEpoch.when)).limit(1)[0]
-        return cls(epoch_model)
+        epoch_record = epoch_query.order_by(orm.desc(records.RewardEpoch.when)).limit(1)[0]
+        return cls(epoch_record)
 
 
 class Purchase(Controller):
-    model = models.Purchase
+    record = records.Purchase
 
     def calculate_cost(self):
         epoch = RewardEpoch.for_purchase(self)

@@ -9,7 +9,7 @@ db = orm.Database()
 session = orm.db_session
 
 
-# IMPORTANT: These models are to be record classes only - all processing will be done with wrapper
+# IMPORTANT: These are to be record classes only - all processing will be done with wrapper
 # classes
 
 # We store dates as integer days from an epoch
@@ -59,7 +59,7 @@ class Token(db.Entity):
 
 
 # ===============================
-# Habit-related models
+# Habit-related records
 # -------------------------------
 #
 # Things that earn the user pd
@@ -92,7 +92,7 @@ class Action(db.Entity):
 
 
 # =====================================
-# Spending models
+# Spending records
 # -------------------------------------
 #
 # Things the user can spend their pd on
