@@ -26,16 +26,16 @@ def clean_dates(kwargs):
     return {key: _clean_date(val) for key, val in kwargs.items()}
 
 
-class Controller:
+class Model:
     @classmethod
     def create(cls, **kwargs):
-        kwargs = _controllers_to_records(kwargs)
+        kwargs = _models_to_records(kwargs)
         r = cls.record(**kwargs)
         return cls(r)
 
     @classmethod
     def get(cls, **kwargs):
-        kwargs = _controllers_to_records(kwargs)
+        kwargs = _models_to_records(kwargs)
         r = cls.record.get(**kwargs)
         if r is None:
             raise ValueError  # TODO: replace with some kind of NotFoundError
@@ -43,7 +43,7 @@ class Controller:
 
     @classmethod
     def get_or_create(cls, **kwargs):
-        kwargs = _controllers_to_records(kwargs)
+        kwargs = _models_to_records(kwargs)
         pk_arg_names = [at.name for at in cls.record._pk_attrs_]
         pk_args = {name: kwargs[name] for name in pk_arg_names}
         r = cls.record.get(**pk_args)
@@ -54,7 +54,7 @@ class Controller:
 
     def __init__(self, record):
         if record is None:
-            raise ValueError('Cannot initialise controllers without record objects')
+            raise ValueError('Cannot initialise models without record objects')
         self._record = record
 
     def _as_dict(self):
@@ -80,17 +80,17 @@ class Controller:
             object.__setattr__(self, name, value)
 
 
-def _controllers_to_records(some_dict):
-    """ Find any controller instances in the given dict and pull out their record instances. """
+def _models_to_records(some_dict):
+    """ Find any model instances in the given dict and pull out their record instances. """
     def convert(thing):
-        if isinstance(thing, Controller):
+        if isinstance(thing, Model):
             return thing._record
         return thing
 
     return {key: convert(val) for (key, val) in some_dict.items()}
 
 
-class Metadata(Controller):
+class Metadata(Model):
     record = records.Metadata
 
     @classmethod
@@ -120,7 +120,7 @@ class Metadata(Controller):
         return (dt - self.start_date).days
 
 
-class User(Controller):
+class User(Model):
     record = records.User
 
     @property
@@ -198,11 +198,11 @@ class User(Controller):
         return out
 
 
-class Token(Controller):
+class Token(Model):
     record = records.Token
 
 
-class Habit(Controller):
+class Habit(Model):
     record = records.Habit
 
     @property
@@ -230,7 +230,7 @@ class Habit(Controller):
         return self.get_regular_on(day).weight
 
 
-class Regular(Controller):
+class Regular(Model):
     record = records.Regular
 
     @property
@@ -248,15 +248,15 @@ class Regular(Controller):
             d += self._record.period
 
 
-class Action(Controller):
+class Action(Model):
     record = records.Action
 
 
-class Reward(Controller):
+class Reward(Model):
     record = records.Reward
 
 
-class RewardEpoch(Controller):
+class RewardEpoch(Model):
     record = records.RewardEpoch
 
     @classmethod
@@ -272,7 +272,7 @@ class RewardEpoch(Controller):
         return cls(epoch_record)
 
 
-class Purchase(Controller):
+class Purchase(Model):
     record = records.Purchase
 
     def calculate_cost(self):

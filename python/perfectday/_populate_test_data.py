@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from perfectday import controllers as c, records as r
+from perfectday import models as m, records as r
 import datetime as dt
 import random
 
@@ -16,11 +16,11 @@ weeks = 7
 
 def populate_db():
     # Metadata (basically for translating datetime into int_date)
-    md = c.Metadata.get_or_create()
-    md.start_date = c.dt_today() - dt.timedelta(days=365)
+    md = m.Metadata.get_or_create()
+    md.start_date = m.dt_today() - dt.timedelta(days=365)
 
     # User
-    u = c.User.get_or_create(name='kitb', password='asdf', created=0)
+    u = m.User.get_or_create(name='kitb', password='asdf', created=0)
 
     now = md.now
 
@@ -29,26 +29,26 @@ def populate_db():
     start3 = now - weeks * 10
 
     # Habit one
-    h = c.Habit.create(user=u, short='Brush teeth')
-    c.Regular.create(habit=h,
+    h = m.Habit.create(user=u, short='Brush teeth')
+    m.Regular.create(habit=h,
                      start=start1,
                      period=weekly,
                      stop=start2,
                      weight=1)
-    c.Regular.create(habit=h,
+    m.Regular.create(habit=h,
                      start=start2,
                      period=eod,
                      stop=start3,
                      weight=1)
-    c.Regular.create(habit=h,
+    m.Regular.create(habit=h,
                      start=start3,
                      period=daily,
                      weight=2)
 
     # Habit two
-    h2 = c.Habit.create(user=u, short='Huel morning')
+    h2 = m.Habit.create(user=u, short='Huel morning')
 
-    c.Regular.create(habit=h2,
+    m.Regular.create(habit=h2,
                      start=start1,
                      period=daily,
                      weight=1)
@@ -58,7 +58,7 @@ def populate_db():
         doing = rng < 0.8
         print(f'{habit.short} on {when}? rng={rng:.2f}, doing: {doing}')
         if doing:
-            c.Action.create(habit=habit, when=when)
+            m.Action.create(habit=habit, when=when)
 
     # Generate actions
     for x in range(365 + 1):
@@ -74,26 +74,26 @@ def populate_db():
         print('=' * 40)
 
     # Add some rewards
-    r1 = c.Reward.create(user=u,
+    r1 = m.Reward.create(user=u,
                          short='MtG Booster Pack')
 
-    c.RewardEpoch.create(reward=r1,
+    m.RewardEpoch.create(reward=r1,
                          when=dt.datetime.now() - dt.timedelta(days=2),
                          cost=3)
 
-    c.RewardEpoch.create(reward=r1,
+    m.RewardEpoch.create(reward=r1,
                          when=md.start_date,
                          cost=1)
 
-    r2 = c.Reward.create(user=u,
+    r2 = m.Reward.create(user=u,
                          short='A fiver')
-    c.RewardEpoch.create(reward=r2,
+    m.RewardEpoch.create(reward=r2,
                          when=md.start_date,
                          cost=1)
 
-    r3 = c.Reward.create(user=u,
+    r3 = m.Reward.create(user=u,
                          short='A takeaway')
-    c.RewardEpoch.create(reward=r3,
+    m.RewardEpoch.create(reward=r3,
                          when=md.start_date,
                          cost=5)
 
@@ -104,7 +104,7 @@ def populate_db():
             reward = random.choice(rs)
             date = md.int_date_to_dt(x)
             print(f'Purchasing {reward.short} on {x}')
-            c.Purchase.create(reward=reward,
+            m.Purchase.create(reward=reward,
                               when=date)
 
     r.db.commit()
