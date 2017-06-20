@@ -54,6 +54,11 @@ class User:
             # Wheeeee indirection
             yield Reward(reward)
 
+    @property
+    def habits(self):
+        for habit in self.model.habits:
+            yield Habit(habit)
+
     def get_worth(self):
         self.model.recache_dates()
         return self.model.calculate_worth()
@@ -67,6 +72,9 @@ class User:
 
     def get_reward(self, **kwargs):
         return Reward.get(user=self.model, **kwargs)
+
+    def get_habit(self, **kwargs):
+        return Habit.get(user=self.model, **kwargs)
 
     def verify_login(self, password):
         auth_ok, maybe_new_digest = auth.verify_and_update(password, self.model.password)
@@ -89,6 +97,10 @@ class User:
 
     def __repr__(self):
         return f'User {self.model.name}'
+
+    def to_dict(self):
+        return {'name': self.model.name,
+                'worth': self.get_worth()}
 
 
 class Schedule:
@@ -130,6 +142,9 @@ class Schedule:
             lines.append(f'\tEvery {period}th starting: {start}')
 
         return '\n'.join(lines)
+
+    def to_dict(self):
+        return [{'start': start, 'period': period} for start, period in self.periods]
 
 
 class Habit:
@@ -180,6 +195,15 @@ class Habit:
 
     def __repr__(self):
         return f'Habit: "{self.model.short}" with weight {self.weight:.1f}'
+
+    def to_dict(self):
+        return {
+            'id': self.model.id,
+            'short': self.model.short,
+            'long': self.model.long,
+            'schedule': self.schedule.to_dict(),
+            'weight': self.weight
+        }
 
 
 class Reward:
@@ -242,6 +266,13 @@ class Reward:
 
     def __repr__(self):
         return f'Reward: "{self.short_description}", costing {self.cost}pd'
+
+    def to_dict(self):
+        return {
+            'id': self.model.id,
+            'short': self.short_description,
+            'long': self.long_description,
+            'cost': self.cost}
 
 
 def main():
