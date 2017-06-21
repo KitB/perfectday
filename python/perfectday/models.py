@@ -167,7 +167,7 @@ class User(Model):
     @property
     def rewards(self):
         for r in self.record.rewards:
-            yield Reward(r)
+            yield RewardModel(r)
 
     def recache_dates(self):
         self._cache_habits = list(self.habits)
@@ -209,7 +209,7 @@ class User(Model):
     def get_purchases(self):
         for p in orm.select(p for p in records.Purchase
                             if p.reward.user == self.record):
-            yield Purchase(p)
+            yield PurchaseModel(p)
 
     def get_day_purchases(self, int_date):
         dt_date = Metadata.get().int_date_to_dt(int_date)
@@ -221,7 +221,7 @@ class User(Model):
                             if (p.reward.user == self.record)
                             and low <= p.when
                             and p.when < high):
-            yield Purchase(p)
+            yield PurchaseModel(p)
 
     def total_purchases(self):
         q = dedent("""\
@@ -313,12 +313,17 @@ class Action(Model):
     _record = records.Action
 
 
-class Reward(Model):
+class RewardModel(Model):
     _record = records.Reward
 
     @property
     def current_epoch(self):
         return self.record.epochs.order_by(orm.desc(records.RewardEpoch.when)).limit(1)[0]
+
+    @property
+    def purchases(self):
+        for p in self.record.purchases:
+            yield PurchaseModel(p)
 
 
 class RewardEpoch(Model):
@@ -337,12 +342,16 @@ class RewardEpoch(Model):
         return cls(epoch_record)
 
 
-class Purchase(Model):
+class PurchaseModel(Model):
     _record = records.Purchase
 
     def calculate_cost(self):
-        epoch = RewardEpoch.for_purchase(self)
+        epoch = RewardEpoch.for_purchase(self.record)
         return epoch.cost
+
+    @property
+    def reward(self):
+        return RewardModel(self.record.reward)
 
 
 def main():

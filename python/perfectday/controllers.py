@@ -52,7 +52,7 @@ class User:
     def rewards(self):
         for reward in self.model.rewards:
             # Wheeeee indirection
-            yield Reward(reward)
+            yield RewardController(reward)
 
     @property
     def habits(self):
@@ -64,14 +64,22 @@ class User:
         return self.model.calculate_worth()
 
     def add_reward(self, *, short, cost, long='', **kwargs):
-        return Reward.create(user=self.model,
-                             short=short,
-                             cost=cost,
-                             long=long,
-                             **kwargs)
+        return RewardController.create(user=self.model,
+                                       short=short,
+                                       cost=cost,
+                                       long=long,
+                                       **kwargs)
 
     def get_reward(self, **kwargs):
-        return Reward.get(user=self.model, **kwargs)
+        return RewardController.get(user=self.model, **kwargs)
+
+    def add_habit(self, *, short, schedule, weight, long='', **kwargs):
+        return Habit.create(user=self.model,
+                            short=short,
+                            schedule=schedule,
+                            weight=weight,
+                            long=long,
+                            **kwargs)
 
     def get_habit(self, **kwargs):
         return Habit.get(user=self.model, **kwargs)
@@ -111,6 +119,13 @@ class Schedule:
             s.add_period(regular.start, regular.period)
         return s
 
+    @classmethod
+    def from_dicts(cls, dicts):
+        s = cls()
+        for d in dicts:
+            s.add_period(d['start'], d['period'])
+        return s
+
     def __init__(self):
         self.periods = []
 
@@ -143,7 +158,7 @@ class Schedule:
 
         return '\n'.join(lines)
 
-    def to_dict(self):
+    def to_dicts(self):
         return [{'start': start, 'period': period} for start, period in self.periods]
 
 
@@ -163,6 +178,22 @@ class Habit:
 
     def __init__(self, model):
         self.model = model
+
+    def perform(self, when=None):
+        if when is None:
+            when = int_now()
+        model = models.Action.get_or_create(habit=self.model,
+                                            when=when)
+        return ActionController(model)
+
+    @property
+    def actions(self):
+        for action in self.model.actions:
+            yield ActionController(action)
+
+    def get_action(self, when):
+        return ActionController.get(habit=self.model,
+                                    when=when)
 
     @property
     def weight(self):
@@ -187,6 +218,12 @@ class Habit:
         for regular in self.model.current_regulars:
             regular.stop_now()
 
+        if isinstance(schedule, Schedule):
+            schedule = schedule.to_dicts()
+
+        if isinstance(schedule[0], dict):
+            schedule = [(d['start'], d['period']) for d in schedule]
+
         for start, period in schedule:
             models.Regular.create(habit=self.model,
                                   start=start,
@@ -201,26 +238,26 @@ class Habit:
             'id': self.model.id,
             'short': self.model.short,
             'long': self.model.long,
-            'schedule': self.schedule.to_dict(),
+            'schedule': self.schedule.to_dicts(),
             'weight': self.weight
         }
 
 
-class Reward:
+class RewardController:
     """ Represents a Reward and its most recent epoch.
 
     Will allow historical epoch access if I ever need it.
     """
     @classmethod
     def get(cls, **kwargs):
-        return cls(models.Reward.get(**kwargs))
+        return cls(models.RewardModel.get(**kwargs))
 
     @classmethod
     def create(cls, *, user, short, cost, long='', **kwargs):
-        r = models.Reward.create(user=user,
-                                 short=short,
-                                 long=long,
-                                 **kwargs)
+        r = models.RewardModel.create(user=user,
+                                      short=short,
+                                      long=long,
+                                      **kwargs)
         r = cls(r, None)
         r.cost = cost  # creates the first epoch
         return r
@@ -233,8 +270,7 @@ class Reward:
             self.epoch = epoch
 
     def purchase(self):
-        return models.Purchase.create(reward=self.model,
-                                      when=datetime.datetime.now())
+        return PurchaseController.create(reward=self.model)
 
     @property
     def cost(self):
@@ -264,6 +300,11 @@ class Reward:
     def long_description(self, new_long):
         self.model.long = new_long
 
+    @property
+    def purchases(self):
+        for purchase in self.model.purchases:
+            yield PurchaseController(purchase)
+
     def __repr__(self):
         return f'Reward: "{self.short_description}", costing {self.cost}pd'
 
@@ -273,6 +314,55 @@ class Reward:
             'short': self.short_description,
             'long': self.long_description,
             'cost': self.cost}
+
+
+class PurchaseController:
+    @classmethod
+    def create(cls, *, reward):
+        model = models.PurchaseModel.create(reward=reward,
+                                            when=datetime.datetime.now())
+        return cls(model)
+
+    @classmethod
+    def get(cls, **kwargs):
+        model = models.PurchaseModel.get(**kwargs)
+        return cls(model)
+
+    @property
+    def reward(self):
+        return RewardController(self.model.reward)
+
+    def __init__(self, model):
+        self.model = model
+
+    def to_dict(self):
+        return {
+            'id': self.model.id,
+            'reward': self.reward.to_dict(),
+            'when': self.model.when
+        }
+
+
+class ActionController:
+    @classmethod
+    def create(cls, *, habit, when):
+        model = models.Action.create(habit=habit,
+                                     when=when)
+        return cls(model)
+
+    @classmethod
+    def get(cls, **kwargs):
+        model = models.Action.get(**kwargs)
+        return cls(model)
+
+    def __init__(self, model):
+        self.model = model
+
+    def to_dict(self):
+        return {
+            'habit': self.model.habit.id,
+            'when': self.model.when
+        }
 
 
 def main():

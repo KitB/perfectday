@@ -88,6 +88,7 @@ class Action(db.Entity):
     """ Indicates that a user did the thing associated with a habit on a specified date. """
     habit = orm.Required(Habit)
     when = orm.Required(int_date)
+    orm.PrimaryKey(habit, when)
 # ===============================
 
 
