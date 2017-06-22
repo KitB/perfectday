@@ -105,6 +105,10 @@ class Model:
         else:
             object.__setattr__(self, name, value)
 
+    def delete(self):
+        self.record.delete()
+        records.db.commit()
+
 
 def _model_to_record(thing):
     if isinstance(thing, Model):
@@ -242,12 +246,8 @@ class Token(Model):
     _record = records.Token
 
     @classmethod
-    def get_non_expired(cls, user, slug):
-        user = _model_to_record(user)
-        q = records.Token.select(lambda t: t.user == user
-                                 and t.slug == slug
-                                 and t.expires > dt.datetime.now()
-                                 )
+    def get_non_expired(cls, slug):
+        q = records.Token.select(lambda t: t.slug == slug and t.expires > dt.datetime.now())
         if q.exists():
             return q.limit(1)[0]
         return None

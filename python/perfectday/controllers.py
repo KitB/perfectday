@@ -39,11 +39,11 @@ class User:
         return cls(u).verify_login(password)
 
     @classmethod
-    def get_from_token(cls, *, name, slug):
-        u = cls.get(name=name)
-        if u.verify_token(slug):
-            return u
-        return None
+    def get_from_token(cls, *, slug):
+        token = models.Token.get_non_expired(slug)
+        if token is None:
+            return None
+        return cls(token.user)
 
     def __init__(self, model):
         self.model = model
@@ -91,7 +91,7 @@ class User:
         else:
             if maybe_new_digest:
                 self.model.password = maybe_new_digest
-            return self.make_token()
+            return True
 
     def make_token(self):
         slug = secrets.token_hex(_constants.TOKEN_BYTES)
@@ -99,9 +99,6 @@ class User:
         return models.Token.create(user=self.model,
                                    slug=slug,
                                    expires=expires)
-
-    def verify_token(self, slug):
-        return models.Token.get_non_expired(self.model, slug) is not None
 
     def __repr__(self):
         return f'User {self.model.name}'
@@ -363,6 +360,9 @@ class ActionController:
             'habit': self.model.habit.id,
             'when': self.model.when
         }
+
+    def delete(self):
+        return self.model.delete()
 
 
 def main():
