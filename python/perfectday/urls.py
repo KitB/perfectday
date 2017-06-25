@@ -16,23 +16,17 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from rest_framework_extensions import routers
+from rest_framework import routers
 
 from perfectday.api import views
 
 
-router = routers.ExtendedSimpleRouter()
-u_router = router.register(r'users', views.UserViewSet, base_name='user')
-h_router = u_router.register(r'habits',
-                             views.HabitViewSet,
-                             base_name='habit-detail',
-                             parents_query_lookups=['user'])
-# s_router = h_router.register(r'schedules',
-#                              views.ScheduleViewSet,
-#                              base_name='users-habits-schedule',
-#                              parents_query_lookups=['schedule__user', 'habit'])
-# router.register(r'groups', views.GroupViewSet)
-
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'people', views.PersonViewSet)
+router.register(r'habits', views.HabitViewSet)
+router.register(r'schedules', views.ScheduleViewSet)
+router.register(r'actions', views.ActionViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
