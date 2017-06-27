@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 
 from perfectday.api import models, serializers
 
@@ -9,7 +9,9 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
 
 
-class PersonViewSet(viewsets.ModelViewSet):
+class PersonViewSet(mixins.RetrieveModelMixin,
+                    mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     queryset = models.Person.objects.all()
     serializer_class = serializers.PersonSerializer
 
@@ -37,3 +39,14 @@ class PeriodViewSet(viewsets.ModelViewSet):
 class ActionViewSet(viewsets.ModelViewSet):
     queryset = models.Action.objects.all()
     serializer_class = serializers.ActionSerializer
+
+
+class RewardViewSet(viewsets.ModelViewSet):
+    queryset = models.Reward.objects.all()
+    serializer_class = serializers.RewardSerializer
+
+
+class PurchaseViewSet(viewsets.ModelViewSet):
+    queryset = models.Purchase.objects.all()
+    serializer_class = serializers.PurchaseSerializer
+    filter_fields = ('reward__person',)

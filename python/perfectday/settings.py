@@ -54,6 +54,11 @@ INSTALLED_APPS = [
 
     # DRF
     'rest_framework',
+    'django_filters',
+    'crispy_forms',
+
+    # Debug
+    'debug_toolbar',
 ]
 
 SITE_ID = 1
@@ -62,6 +67,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAdminUser',
     ],
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'PAGE_SIZE': 10,
 }
 
@@ -73,7 +79,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
+INTERNAL_IPS = ['127.0.0.1']
 
 ROOT_URLCONF = 'perfectday.urls'
 
