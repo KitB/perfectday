@@ -15,6 +15,16 @@ class PersonViewSet(mixins.RetrieveModelMixin,
     queryset = models.Person.objects.all()
     serializer_class = serializers.PersonSerializer
 
+    def retrieve(self, request, pk=None):
+        self.getting_current = pk == 'me'
+        return super(PersonViewSet, self).retrieve(request, pk=None)
+
+    def get_object(self):
+        if self.getting_current:
+            return self.request.user.person
+        else:
+            return super(PersonViewSet, self).get_object()
+
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()

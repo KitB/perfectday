@@ -17,25 +17,14 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from rest_framework import routers
-
-from perfectday.api import views
-
-
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'people', views.PersonViewSet)
-router.register(r'habits', views.HabitViewSet)
-router.register(r'actions', views.ActionViewSet)
-router.register(r'rewards', views.RewardViewSet)
-router.register(r'purchases', views.PurchaseViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^frontend/', include('perfectday.frontend.urls')),
+    url(r'^api/', include('perfectday.api.urls')),
 ]
 
 if settings.DEBUG:

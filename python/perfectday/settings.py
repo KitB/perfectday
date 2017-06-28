@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # My Apps
     'perfectday.api',
+    'perfectday.frontend',
 
     # Basic django
     'django.contrib.admin',
@@ -56,10 +57,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'crispy_forms',
+    'rules',
 
     # Debug
     'debug_toolbar',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 SITE_ID = 1
 
