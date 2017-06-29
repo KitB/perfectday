@@ -1,4 +1,7 @@
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 <script src="{% static 'rest_framework/js/coreapi-0.1.0.js' %}"></script>
 <script src="{% url 'api-docs:schema-js'  %}"></script>
 <script>
@@ -9,3 +12,6 @@ var auth = new coreapi.auth.SessionAuthentication({
 
 var client = new coreapi.Client({auth: auth})
 </script>
+<div id="root"></div>
+
+{% render_bundle 'main' %}

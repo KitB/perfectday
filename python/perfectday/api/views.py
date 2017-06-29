@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, response, status
 
 from perfectday.api import models, serializers
 
@@ -34,6 +34,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.HabitSerializer
     queryset = models.Habit.objects.all()
+    filter_fields = ('person',)
 
 
 class ScheduleViewSet(viewsets.ModelViewSet):
@@ -49,6 +50,10 @@ class PeriodViewSet(viewsets.ModelViewSet):
 class ActionViewSet(viewsets.ModelViewSet):
     queryset = models.Action.objects.all()
     serializer_class = serializers.ActionSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return response.Response({'message': 'deleted'}, status=status.HTTP_200_OK)
 
 
 class RewardViewSet(viewsets.ModelViewSet):

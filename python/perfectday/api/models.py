@@ -91,7 +91,28 @@ class Habit(models.Model):
 
     @property
     def schedule(self):
-        return Schedule.objects.get(habit=self, stop__isnull=True)
+        try:
+            return Schedule.objects.get(habit=self, stop__isnull=True)
+        except Schedule.DoesNotExist:
+            return None
+
+    @property
+    def happened_today(self):
+        return self.happened_on(utils.int_now())
+
+    @property
+    def today_action_id(self):
+        if self.happened_today:
+            return self.action_on(utils.int_now()).id
+
+    def happened_on(self, day):
+        return self._action_on(day).exists()
+
+    def action_on(self, day):
+        return self._action_on(day).get()
+
+    def _action_on(self, day):
+        return Action.objects.filter(habit=self, when=day)
 
     @property
     def weight(self):

@@ -25,7 +25,7 @@ SECRET_KEY = '3!&494lo46c3i1menmq*kj1y6!%1h3*)^_$%qxq*q3b(_xf5yj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'ace-rimmer', 'ace-rimmer.mhn']
 
 
 # Application definition
@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     # My Apps
     'perfectday.api',
     'perfectday.frontend',
+
+    # Javascript stuff
+    'webpack_loader',
 
     # Basic django
     'django.contrib.admin',
@@ -158,5 +161,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
+
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'assets'),
+)
+
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json')
+    }
+}
+
 
 STATIC_URL = '/static/'
