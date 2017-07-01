@@ -13,7 +13,7 @@ injectTapEventPlugin();
 
 const client = window.client
 const schema = window.schema
-window.pd = new PD(client, schema)
+const pd = new PD(client, schema)
 
 
 
@@ -22,7 +22,7 @@ window.store = store
 
 ReactDOM.render(
     <Provider store={store}>
-        <App store={store} />
+        <App apiClient={pd} />
     </Provider>,
     document.getElementById('root')
 );

@@ -8,14 +8,13 @@ const mapStateToProps = state => {
     }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch, ownProps) => {
     return {
         onHabitChange: (habit, checked) => {
-            const fn = () => checked ? window.pd.doHabit(habit) : window.pd.undoHabit(habit)
+            const pd = ownProps.apiClient
+            const fn = () => checked ? pd.doHabit(habit) : pd.undoHabit(habit)
             fn().then(() => {
-                console.log(habit)
-                window.pd.listHabits(window.me.id).then(response => {
-                    console.log(response)
+                pd.listHabits(window.me.id).then(response => {
                     dispatch(setHabits(response.results))
                 })
             })
