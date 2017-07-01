@@ -1,35 +1,40 @@
 import '../css/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import injectTapEventPlugin from 'react-tap-event-plugin'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import User from './User'
+import injectTapEventPlugin from 'react-tap-event-plugin';
+import { createStore } from 'redux';
+import { setHabits } from './actions'
+import { Provider } from 'react-redux'
+import PD from './PD'
+import pdApp from './reducers'
+import App from './components/App'
 
 injectTapEventPlugin();
 
-console.log(client);
+const client = window.client
+const schema = window.schema
+window.pd = new PD(client, schema)
 
 
-class App extends React.Component {
-  render() {
-    return (
-      <MuiThemeProvider>
-        <User person={this.props.person} habits={this.props.habits}/>
-      </MuiThemeProvider>
-    )
-  }
-}
+
+const store = createStore(pdApp)
+window.store = store
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App store={store} />
+    </Provider>,
+    document.getElementById('root')
+);
+
 
 client.action(schema, ['people', 'read'], {'id': 'me'}).then(function(person) {
-  client.action(schema, ['habits', 'list'], {'person': person.id}).then(function(habits){
-    console.log(person);
-    console.log(habits.results);
-    ReactDOM.render(
-        <App person={person} habits={habits.results} />,
-        document.getElementById('root')
-    );
-  })
+    window.me = person
+    client.action(schema, ['habits', 'list'], {'person': person.id}).then(function(habits){
+        console.log(person)
+        console.log(habits.results)
+        console.log(store)
+        store.dispatch(setHabits(habits.results));
+
+    })
 });
-
-
-
