@@ -27,7 +27,10 @@ const theme = createMuiTheme({
 })
 
 const store = createStore(pdApp)
-window.store = store  // So we can access it in the console
+
+// So we can access them in the console
+window.store = store
+window.pd = pd
 
 ReactDOM.render(
     <Provider store={store}>
@@ -38,11 +41,9 @@ ReactDOM.render(
     document.getElementById('root')
 );
 
-
-client.action(schema, ['people', 'read'], {'id': 'me'}).then(function(person) {
+pd.whoami().then(person => {
     store.dispatch(setMe(person))
-    client.action(schema, ['habits', 'list'], {'person': person.id}).then(function(habits){
-        store.dispatch(setHabits(habits.results));
-
+    pd.listHabits(person.id).then(habits => {
+        store.dispatch(setHabits(habits.results))
     })
-});
+})
