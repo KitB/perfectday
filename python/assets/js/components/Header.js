@@ -11,25 +11,47 @@ import Typography from 'material-ui/Typography'
 
 // Active containers
 import DisplayWorth from '../containers/DisplayWorth'
+import DisplayAvatar from '../containers/DisplayAvatar'
+
+const horizPad = '8vw'
+
+const centerVert = {
+    position: 'relative',
+    top: '50%',
+    transform: 'translateY(-50%)',
+}
 
 const styleSheet = createStyleSheet('PaperSheet', theme => ({
     header: {
         background: theme.palette.primary[500],
         height: '30vh',
+        paddingLeft: horizPad,
+        paddingRight: horizPad,
     },
-    pd_container: {
+    pdContainer: {
         float: 'right',
-        paddingRight: '8vw',
-        position: 'relative',
-        top: '50%',
+        width: '50%',
         right: '0',
-        transform: 'translateY(-50%)',
+        textAlign: 'center',
+        ...centerVert,
+    },
+    avatarContainer: {
+        float: 'left',
+        width: '50%',
+        paddingRight: horizPad,
+        boxSizing: 'border-box',
+        textAlign: 'center',
+        ...centerVert,
     },
 }))
 
+
 const Header = ({classes}) => (
     <Paper className={classes.header} square={true} elevation={4}>
-        <div className={classes.pd_container}>
+        <div className={classes.avatarContainer}>
+            <DisplayAvatar />
+        </div>
+        <div className={classes.pdContainer}>
             <Typography type='display3'>
                 <DisplayWorth />
             </Typography>

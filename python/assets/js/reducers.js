@@ -13,6 +13,9 @@ function habits(state = [], action) {
 
 const defaultMe = {
   worth: 0,
+  user: {
+    email: 'example@example.com',
+  },
 }
 
 function me(state=defaultMe, action) {
