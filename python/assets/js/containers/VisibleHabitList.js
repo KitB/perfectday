@@ -5,17 +5,18 @@ import { setHabits } from '../actions'
 const mapStateToProps = state => {
     return {
         habits: state.habits,
+        me: state.me,
     }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        onHabitChange: (habit, checked) => {
+        onHabitClick: (habit, me) => {
             const pd = ownProps.apiClient
-            const fn = () => checked ? pd.doHabit(habit) : pd.undoHabit(habit)
+            const fn = () => habit.happened_today ? pd.undoHabit(habit) : pd.doHabit(habit)
             fn().then(() => {
-                pd.listHabits(window.me.id).then(response => {
-                    dispatch(setHabits(response.results))
+                pd.listHabits(me.id).then(listResponse => {
+                    dispatch(setHabits(listResponse.results))
                 })
             })
         }

@@ -1,23 +1,20 @@
 import React from 'react'
 import VisibleHabitList from '../containers/VisibleHabitList'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Paper from 'material-ui/Paper'
+import Header from '../components/Header'
 import PropTypes from 'prop-types'
 import PerfectDay from '../PD'
 
 
 const App = ({apiClient}) => {
-    console.log(apiClient)
     return (
-        <MuiThemeProvider>
             <div>
+                <Header />
                 <VisibleHabitList apiClient={apiClient} />
             </div>
-        </MuiThemeProvider>
     )
 }
 App.propTypes = {
-    apiClient: PropTypes.instanceOf(PerfectDay)
+    apiClient: PropTypes.instanceOf(PerfectDay).isRequired,
 }
 
 export default App
