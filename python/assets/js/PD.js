@@ -13,7 +13,7 @@ class PerfectDay {
     }
 
     whoami() {
-        return this.get_person('me')
+        return this.getPerson('me')
     }
 
     listHabits(person) {
