@@ -31,10 +31,12 @@
     "gravatar": "^1.6.0",
     "immutable": "^3.8.1",
     "material-ui": "^1.0.0-alpha.20",
+    "material-ui-icons": "^1.0.0-alpha.19",
     "numeral": "^2.0.6",
     "react-redux": "^5.0.5",
-    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
     "react-tap-event-plugin": "^2.0.1",
-    "redux": "^3.7.1"
+    "redux": "^3.7.1",
+    "redux-little-router": "^13.2.0"
   }
 }

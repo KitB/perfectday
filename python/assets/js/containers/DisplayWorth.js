@@ -3,7 +3,7 @@ import Currency from '../components/Currency'
 
 const mapStateToProps = state => {
   return {
-    value: state.me.worth,
+    value: state.pd.me.worth,
   }
 }
 

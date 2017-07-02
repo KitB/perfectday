@@ -1,11 +1,12 @@
 import { connect } from 'react-redux'
 import HabitList from '../components/HabitList'
 import { setHabits } from '../actions'
+import { push } from 'redux-little-router'
 
 const mapStateToProps = state => {
     return {
-        habits: state.habits,
-        me: state.me,
+        habits: state.pd.habits,
+        me: state.pd.me,
     }
 }
 
@@ -19,6 +20,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
                     dispatch(setHabits(listResponse.results))
                 })
             })
+        },
+        onHabitSecondaryClick: (habitId) => {
+            dispatch(push('/habit/' + habitId))
         }
     }
 }
