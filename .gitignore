@@ -89,3 +89,17 @@ ENV/
 .ropeproject
 
 *_pb2.py
+
+# Other shit
+*.sqlite
+*.sqlite3
+blah
+blah/
+
+
+# =====================
+# Javascript now
+# =====================
+bundles/
+node_modules/
+webpack-stats.json
