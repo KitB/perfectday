@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
-import HabitList from '../components/HabitList'
-import { setHabits } from '../actions'
+import HabitList from './HabitList'
+import { setHabits } from 'actions'
 import { push } from 'redux-little-router'
 
 const mapStateToProps = state => {

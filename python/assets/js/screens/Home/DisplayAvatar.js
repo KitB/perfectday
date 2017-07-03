@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import Avatar from '../components/Avatar'
+import Avatar from 'common/Avatar'
 
 const mapStateToProps = state => ({
   email: state.pd.me.user.email,

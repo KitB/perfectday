@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import Currency from '../components/Currency'
+import Currency from 'common/Currency'
 
 const mapStateToProps = state => {
   return {

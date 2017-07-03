@@ -11,7 +11,7 @@ import { blue, pink, red } from 'material-ui/styles/colors'
 
 import { setHabits, setMe } from './actions'
 import PD from './PD'
-import App from './components/App'
+import App from './App'
 import configureStore from './store'
 
 injectTapEventPlugin()

@@ -9,6 +9,9 @@ const routes = {
     '/habit/:id': {
         title: 'Habit detail: ',
     },
+    '/newhabit': {
+        title: 'Add habit',
+    }
 }
 
 const { reducer, middleware, enhancer } = routerForBrowser({
