@@ -9,7 +9,7 @@ import IconButton from 'material-ui/IconButton'
 import ChevronRight from 'material-ui-icons/ChevronRight'
 
 const Habit = ({ onClick, onSecondaryClick, happened, text }) => (
-    <ListItem dense IconButto n
+    <ListItem dense button
               onClick={onClick}
               label={text}
     >
