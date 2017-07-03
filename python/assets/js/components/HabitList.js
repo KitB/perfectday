@@ -6,8 +6,8 @@ import Habit from './Habit'
 const HabitList = ({ habits, onHabitClick, onHabitSecondaryClick, me }) => (
     <List>
         {
-            habits.map(habit => (
-                <Habit key={habit.id}
+            Object.entries(habits).map(([key, habit]) => (
+                <Habit key={key}
                        happened={habit.happened_today}
                        text={habit.short_description}
                        onClick={(e) => onHabitClick(habit, me, e)}
@@ -20,7 +20,7 @@ const HabitList = ({ habits, onHabitClick, onHabitSecondaryClick, me }) => (
 )
 
 HabitList.propTypes = {
-    habits: PropTypes.arrayOf(
+    habits: PropTypes.objectOf(
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             happened_today: PropTypes.bool.isRequired,

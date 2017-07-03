@@ -2,10 +2,15 @@ import { combineReducers } from 'redux'
 
 import { SET_HABITS, SET_ME } from './actions'
 
-function habits(state = [], action) {
+function habits(state = {}, action) {
     switch(action.type) {
-        case SET_HABITS:
-            return action.payload.habits
+        case SET_HABITS: {
+            const out = {}
+            for (var habit of action.payload.habits) {
+                out[habit.id] = habit
+            }
+            return out
+        }
         default:
             return state
     }
