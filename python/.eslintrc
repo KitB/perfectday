@@ -29,5 +29,8 @@
   "plugins": [
     "import",
     "react"
-  ]
+  ],
+  "settings": {
+    "import/resolver": "webpack",
+    }
 }
