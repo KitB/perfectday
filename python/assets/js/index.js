@@ -7,7 +7,7 @@ import { initializeCurrentLocation } from 'redux-little-router'
 
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
 import createPalette from 'material-ui/styles/palette'
-import { blue, pink, red } from 'material-ui/styles/colors'
+import { blue, pink, red } from 'material-ui/colors'
 
 import { actions } from 'Store/Ducks'
 import PD from './PD'

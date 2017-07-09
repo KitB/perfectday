@@ -25,7 +25,8 @@ class PerfectDay {
     }
 
     newHabit(habit) {
-        return this.action(['habits', 'create', habit])
+        console.log(habit)
+        return this.action(['habits', 'create'], habit)
     }
 
     doHabit(habit) {

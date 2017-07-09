@@ -6,10 +6,16 @@ import { goBack, push } from 'redux-little-router'
 import { actions } from 'Store/Ducks'
 import { PeriodRecord } from 'Store/Ducks/Habits'
 
-import RawSchedule from 'common/Schedule'
+import RawSchedule from './Component'
 
-const mapStateToProps = state => {
-    const habitId = Number(state.router.params.id)
+export const habitSelectors = {
+    fromLocation: state => Number(state.router.params.id),
+    const: value => () => value,
+    newHabit: () => 'new',
+}
+
+const mapStateToProps = (state, ownProps) => {
+    const habitId = ownProps.habitSelector(state)
     const habit = state.pd.habits.get(habitId)
     let periods = Set()
     if (habit !== undefined) {
@@ -23,16 +29,33 @@ const mapStateToProps = state => {
     }
 }
 
-const mapDispatchToProps = dispatch => ({
-    toggle: (habitId, start, period) => dispatch(actions.habits.schedule.toggle(habitId, start, period)),
-    onCancel: (apiClient, me) => {
+export const onSaves = {
+    sendUpdate:  dispatch => (apiClient, habit) => {
+        dispatch(actions.habits.save(apiClient, habit))
+        dispatch(goBack())
+    },
+    goBack: dispatch => () => {
+        dispatch(goBack())
+    }
+}
+
+export const onCancels = {
+    loadHabits: dispatch => (apiClient, me) => {
         dispatch(actions.habits.load(apiClient, me))
         dispatch(goBack())
     },
-    onSave: (apiClient, habit) => {
-        dispatch(actions.habits.schedule.save(apiClient, habit))
+    clearNew: dispatch => () => {
+        dispatch(actions.habits.clear('new'))
         dispatch(goBack())
     },
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    toggle: (habitId, start, period) => (
+        dispatch(actions.habits.update.schedule.toggle(habitId, start, period))
+    ),
+    onCancel: ownProps.onCancel(dispatch),
+    onSave: ownProps.onSave(dispatch),
     go: loc => dispatch(push(loc)),
 })
 
