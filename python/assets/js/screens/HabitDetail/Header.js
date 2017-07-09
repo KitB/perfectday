@@ -23,7 +23,13 @@ RawHabitHeader.propTypes = {
 
 const mapStateToProps = state => {
     const id = state.router.params.id
-    const habit = state.pd.habits[id]
+    let habit = state.pd.habits.get(Number(id))
+    if (habit === undefined) {
+        habit = {
+            short_description: '',
+            long_description: '',
+        }
+    }
     return {
         habit: habit,
     }

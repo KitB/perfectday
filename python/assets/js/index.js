@@ -3,16 +3,16 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import injectTapEventPlugin from 'react-tap-event-plugin'
-import { initializeCurrentLocation, RouterProvider } from 'redux-little-router'
+import { initializeCurrentLocation } from 'redux-little-router'
 
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
 import createPalette from 'material-ui/styles/palette'
 import { blue, pink, red } from 'material-ui/styles/colors'
 
-import { setHabits, setMe } from './actions'
+import { actions } from 'Store/Ducks'
 import PD from './PD'
 import App from './App'
-import configureStore from './store'
+import configureStore from 'Store'
 
 injectTapEventPlugin()
 
@@ -29,29 +29,29 @@ const theme = createMuiTheme({
 })
 
 const store = configureStore()
-const initialLocation = store.getState().router
-if (initialLocation) {
-    store.dispatch(initializeCurrentLocation(initialLocation))
-}
 
 // So we can access them in the console
 window.store = store
 window.pd = pd
+window.actions = actions
+
+store.dispatch(actions.apiClient.set(pd))
+
+const initialLocation = store.getState().router
+initialLocation.hash = location.hash
+if (initialLocation) {
+    store.dispatch(initializeCurrentLocation(initialLocation))
+}
+
+store.dispatch(actions.me.load(pd)).then(({payload}) => {
+    store.dispatch(actions.habits.load(pd, payload.id))
+})
 
 ReactDOM.render(
-    <RouterProvider store={store}>
-        <Provider store={store}>
-            <MuiThemeProvider theme={theme}>
-                <App apiClient={pd} />
-            </MuiThemeProvider>
-        </Provider>
-    </RouterProvider>,
+    <Provider store={store}>
+        <MuiThemeProvider theme={theme}>
+            <App apiClient={pd} />
+        </MuiThemeProvider>
+    </Provider>,
     document.getElementById('root')
 );
-
-pd.whoami().then(person => {
-    store.dispatch(setMe(person))
-    pd.listHabits(person.id).then(habits => {
-        store.dispatch(setHabits(habits.results))
-    })
-})

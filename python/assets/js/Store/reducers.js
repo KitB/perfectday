@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 
-import { SET_HABITS, SET_ME } from './actions'
+import { SET_HABITS, SET_ME, SET_API_CLIENT } from './actions'
 
 function habits(state = {}, action) {
     switch(action.type) {
@@ -33,9 +33,19 @@ function me(state=defaultMe, action) {
     }
 }
 
+function apiClient(state=null, action) {
+    switch(action.type) {
+        case SET_API_CLIENT:
+            return action.payload
+        default:
+            return state
+    }
+}
+
 const pdApp = combineReducers({
     habits,
     me,
+    apiClient,
 })
 
 export default pdApp

@@ -3,6 +3,10 @@ export const fullScreen = {
     width: '100vw',
 }
 
+export const padded = {
+    padding: '4vw'
+}
+
 export const centerVert = {
     position: 'relative',
     top: '50%',

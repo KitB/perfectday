@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import HabitList from './HabitList'
-import { setHabits } from 'actions'
+import { actions } from 'Store/Ducks'
 import { push } from 'redux-little-router'
 
 const mapStateToProps = state => {
@@ -12,14 +12,12 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        onHabitClick: (habit, me) => {
+        onHabitClick: async (habit, me) => {
             const pd = ownProps.apiClient
             const fn = () => habit.happened_today ? pd.undoHabit(habit) : pd.doHabit(habit)
-            fn().then(() => {
-                pd.listHabits(me.id).then(listResponse => {
-                    dispatch(setHabits(listResponse.results))
-                })
-            })
+
+            await fn()
+            return await dispatch(actions.habits.load(pd, me.id))
         },
         onHabitSecondaryClick: (habitId) => {
             dispatch(push('/habit/' + habitId))

@@ -38,6 +38,8 @@
     "react-router-dom": "^4.1.1",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.7.1",
-    "redux-little-router": "^13.2.0"
+    "redux-actions": "^2.2.1",
+    "redux-little-router": "^14.1.0",
+    "redux-promise": "^0.5.3"
   }
 }

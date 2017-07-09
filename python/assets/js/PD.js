@@ -20,6 +20,14 @@ class PerfectDay {
         return this.action(['habits', 'list'], {person: person})
     }
 
+    updateHabit(habit) {
+        return this.action(['habits', 'update'], habit)
+    }
+
+    newHabit(habit) {
+        return this.action(['habits', 'create', habit])
+    }
+
     doHabit(habit) {
         return this.action(['actions', 'create'], {habit: habit.url, when: 0})
     }
