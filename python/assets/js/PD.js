@@ -25,7 +25,6 @@ class PerfectDay {
     }
 
     newHabit(habit) {
-        console.log(habit)
         return this.action(['habits', 'create'], habit)
     }
 

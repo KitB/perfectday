@@ -2,7 +2,7 @@ import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
 import { routerForBrowser } from 'redux-little-router'
 import promiseMiddleware from 'redux-promise'
 
-import { reducer, enhancer } from './Ducks'
+import { reducer, enhancer as ducksEnhancer } from './Ducks'
 
 const routes = {
     '/home/': {
@@ -10,10 +10,10 @@ const routes = {
     },
     '/habit/:id': {
         title: 'Habit detail: ',
+        '/edit': {
+            title: 'Editing habit: ',
+        },
     },
-    '/newhabit': {
-        title: 'Add habit',
-    }
 }
 
 const loggerMiddleware = () => next => action => {
@@ -30,7 +30,7 @@ const configureStore = () => {
     return createStore(
         combineReducers({ router: routeReducer, pd: reducer }),
         {},
-        compose(enhancer, routeEnhancer, applyMiddleware(loggerMiddleware, routeMiddleware, promiseMiddleware)),
+        compose(routeEnhancer, applyMiddleware( routeMiddleware), ducksEnhancer, applyMiddleware(loggerMiddleware, promiseMiddleware))
     )
 }
 

@@ -4,9 +4,9 @@ import PropTypes from 'prop-types'
 import { Fragment } from 'redux-little-router'
 
 // Screens
-import NewHabit from 'screens/NewHabit'
 import Home from 'screens/Home'
 import HabitDetail from 'screens/HabitDetail'
+import HabitEdit from 'screens/HabitEdit'
 
 // Extra fluff
 import PerfectDay from 'PD'
@@ -19,10 +19,14 @@ const App = ({apiClient}) => (
             <Home apiClient={apiClient} />
         </Fragment>
         <Fragment forRoute='/habit/:id'>
-            <HabitDetail />
-        </Fragment>
-        <Fragment forRoute='/newhabit'>
-            <NewHabit />
+            <div>
+                <Fragment forRoute='/edit'>
+                    <HabitEdit />
+                </Fragment>
+                <Fragment forNoMatch>
+                    <HabitDetail />
+                </Fragment>
+            </div>
         </Fragment>
     </div>
 )

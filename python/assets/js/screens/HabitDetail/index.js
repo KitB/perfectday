@@ -2,10 +2,10 @@ import React from 'react'
 
 import Paper from 'material-ui/Paper'
 
-import { fullScreen, padded } from 'commonStyles'
-
 import Header from './Header'
-import Schedule, { habitSelectors, onSaves, onCancels } from 'common/Schedule'
+import { ScheduleDisplay } from 'common/Schedule'
+
+import { BodyPane, Screen } from 'common/components'
 
 const paper = {
     padding: '2vw',
@@ -13,17 +13,14 @@ const paper = {
 }
 
 const Habit = () => (
-    <div style={{...fullScreen}}>
+    <Screen>
         <Header />
-        <div style={{...padded}}>
+        <BodyPane>
             <Paper style={paper} elevation={4}>
-                <Schedule habitSelector={habitSelectors.fromLocation}
-                          onSave={onSaves.sendUpdate}
-                          onCancel={onCancels.loadHabits}
-                />
+                <ScheduleDisplay />
             </Paper>
-        </div>
-    </div>
+        </BodyPane>
+    </Screen>
 )
 
 export default Habit

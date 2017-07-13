@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { CardHeader, CardContent } from 'material-ui/Card'
+
 import Button from 'material-ui/Button'
 
 
@@ -28,13 +30,19 @@ const container = {
 
 
 const Select = ({goWeekly, goPeriodic}) => (
-    <div style={container}>
-        <div style={leftButton}>
-            <Button style={button} onClick={goWeekly}>By day of week</Button>
-        </div>
-        <div style={rightButton}>
-            <Button style={button} onClick={goPeriodic}>By period</Button>
-        </div>
+    <div>
+        <CardHeader
+            title='Schedule'
+            subheader='Choose type'
+        />
+        <CardContent style={container}>
+            <div style={leftButton}>
+                <Button style={button} onClick={goWeekly}>By day of week</Button>
+            </div>
+            <div style={rightButton}>
+                <Button style={button} onClick={goPeriodic}>By period</Button>
+            </div>
+        </CardContent>
     </div>
 )
 

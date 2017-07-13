@@ -4,7 +4,7 @@ import Card, { CardContent } from 'material-ui/Card'
 
 import { fullScreen, padded } from 'commonStyles'
 
-import Schedule, { habitSelectors, onSaves, onCancels } from 'common/Schedule'
+import { Edit } from 'common/Schedule'
 
 import Header from './Header'
 import WeightSelect from './Weight'
@@ -26,9 +26,9 @@ const NewHabit = () => (
         <div style={{...padded}}>
             <Card>
                 <CardContent>
-                    <Schedule habitSelector={habitSelectors.newHabit}
-                              onSave={onSaves.goBack}
-                              onCancel={onCancels.clearNew}
+                    <Edit.Schedule habitSelector={Edit.habitSelectors.newHabit}
+                                   onSave={Edit.onSaves.goBack}
+                                   onCancel={Edit.onCancels.clearNew}
                     />
                 </CardContent>
             </Card>

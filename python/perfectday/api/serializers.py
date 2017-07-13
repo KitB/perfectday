@@ -86,10 +86,13 @@ class HabitSerializer(serializers.HyperlinkedModelSerializer):
         schedule = models.Schedule.objects.create(habit=habit, **schedule_data)
 
         for period_data in periods_data:
-            models.Period.objects.create(schedule=schedule, **period_data)
+            models.Period.objects.create(schedule=schedule, **period_data).save()
+
+        schedule.save()
 
         habit.short_description = validated_data.get('short_description', habit.short_description)
         habit.long_description = validated_data.get('long_description', habit.long_description)
+        habit.save()
 
         return habit
 

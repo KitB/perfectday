@@ -5,7 +5,7 @@ import { push } from 'redux-little-router'
 
 const mapStateToProps = state => {
     return {
-        habits: state.pd.habits.filter(habit => habit.id !== 'new'),
+        habits: state.pd.habits.filter(habit => habit.id !== null),
         me: state.pd.me,
     }
 }

@@ -21,7 +21,7 @@ RawAddHabitFab.propTypes = {
 
 const mapDispatchToProps = (dispatch) => ({
     onAddHabitLink: () => {
-        dispatch(push('/newhabit'))
+        dispatch(push('/habit/new/edit'))
     }
 })
 

@@ -1,16 +1,12 @@
-// React
 import React from 'react'
 import PropTypes from 'prop-types'
 import childrenPropType from 'react-children-proptype'
 
-// MUI meta
 import { withStyles, createStyleSheet } from 'material-ui/styles'
 
-// Components
 import Paper from 'material-ui/Paper'
 
-// Other stuff
-import { centerVert } from '../commonStyles'
+import { centerVert } from 'commonStyles'
 
 const horizPad = '8vw'
 
@@ -20,7 +16,7 @@ const styleSheet = createStyleSheet('PaperSheet', theme => ({
         height: '30vh',
         paddingLeft: horizPad,
         paddingRight: horizPad,
-    },
+    }
 }))
 
 

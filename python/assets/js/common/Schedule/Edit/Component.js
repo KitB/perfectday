@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Typography from 'material-ui/Typography'
+import Card, {  } from 'material-ui/Card'
 
 import { Fragment } from 'redux-little-router'
 
@@ -16,22 +17,21 @@ const isWeekly = location => location.hash === '#' + weekly
 const isPeriodic = location => location.hash === '#' + periodic
 
 
-const Schedule = ({periods, hasDay, onSave, onCancel, toggleDay, togglePeriod, go}) => (
-    <div>
+const Schedule = ({periods, hasDay, toggleDay, togglePeriod, go}) => (
+    <Card>
         <Fragment forRoute='/' withConditions={location => {
             const out = !isWeekly(location) && !isPeriodic(location)
-            console.log('Condition check: ', location)
             return out
         }}>
-        <Select goWeekly={() => go({hash: weekly})} goPeriodic={() => go({hash: periodic})} />
+            <Select goWeekly={() => go({hash: weekly})} goPeriodic={() => go({hash: periodic})} />
         </Fragment>
         <Fragment forRoute='/' withConditions={isWeekly}>
-            <Week hasDay={hasDay} onSave={onSave} onCancel={onCancel} toggleDay={toggleDay} />
+            <Week hasDay={hasDay} toggleDay={toggleDay} goBack={() => go({hash: ''})} />
         </Fragment>
         <Fragment forRoute='/' withConditions={isPeriodic}>
             <Typography periods={periods} togglePeriod={togglePeriod} type='body1'>By start and interval</Typography>
         </Fragment>
-    </div>
+    </Card>
 )
 
 Schedule.propTypes = {

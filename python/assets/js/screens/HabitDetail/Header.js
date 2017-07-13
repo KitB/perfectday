@@ -2,41 +2,48 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import Typography from 'material-ui/Typography'
+import { push } from 'redux-little-router'
 
-import Header from 'common/Header'
+import IconButton from 'material-ui/IconButton'
 
-const RawHabitHeader = ({habit}) => (
-        <Header>
-            <Typography type='display2'>
-                {habit.short_description}
-            </Typography>
-            <Typography type='caption'>
-                {habit.long_description}
-            </Typography>
-        </Header>
+import EditIcon from 'material-ui-icons/Edit'
+
+import { BarHeader, BarTitle } from 'common/components'
+import ShortDescription from 'common/containers/habit/Short'
+import Back from 'common/containers/Back'
+
+const RawHabitHeader = ({habit, goEdit}) => (
+    <BarHeader>
+        <Back />
+        <BarTitle>
+            <ShortDescription habit={habit} />
+        </BarTitle>
+        <IconButton color='contrast' onClick={() => goEdit(habit.id)}>
+            <EditIcon />
+        </IconButton>
+    </BarHeader>
 )
 
 RawHabitHeader.propTypes = {
-    habit: PropTypes.object.isRequired,
+    habit: PropTypes.object,
+    goEdit: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = state => {
     const id = state.router.params.id
     let habit = state.pd.habits.get(Number(id))
-    if (habit === undefined) {
-        habit = {
-            short_description: '',
-            long_description: '',
-        }
-    }
     return {
         habit: habit,
     }
 }
 
+const mapDispatchToProps = (dispatch) => ({
+    goEdit: (id) => dispatch(push(`/habit/${id}/edit`)),
+})
+
 const HabitHeader = connect(
     mapStateToProps,
+    mapDispatchToProps,
 )(RawHabitHeader)
 
 export default HabitHeader

@@ -45,8 +45,11 @@ export const reducer = handleActions({
 }, defaultState)
 
 export const middleware = store => next => action => {
+    console.log(action.type)
+    console.log('asdfasdfasdfasdf')
     switch (action.type) {
         case 'ROUTER_LOCATION_CHANGED':
+            console.log(action.payload.route)
             if (action.payload.route == '/habit/:id') {
                 const habit = store.getState().pd.habits[action.payload.params.id]
                 store.dispatch(actions.schedule.loadHabit(habit))
