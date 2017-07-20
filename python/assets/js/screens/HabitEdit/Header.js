@@ -42,14 +42,14 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => ({
     saveChanges: async (apiClient, habit, me) => {
         dispatch(goBack())
-        await dispatch(actions.prospective.habit.save(apiClient, habit))
-        dispatch(actions.habits.load(apiClient, me))
+        await dispatch(actions.prospective.habit.save(apiClient, habit, me.url))
+        dispatch(actions.habits.load(apiClient, me.id))
     },
 })
 
 const mergeProps = (stateProps, dispatchProps) => ({
     habit: stateProps.habit,
-    saveChanges: () => dispatchProps.saveChanges(stateProps.apiClient, stateProps.getProspectiveHabit(), stateProps.me.id),
+    saveChanges: () => dispatchProps.saveChanges(stateProps.apiClient, stateProps.getProspectiveHabit(), stateProps.me),
 })
 
 const HabitHeader = connect(

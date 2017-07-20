@@ -13,12 +13,15 @@ const periodAction = (start, period) => ({
 export const actions = createActions({
     PROSPECTIVE: {
         HABIT: {
-            SAVE: async (apiClient, habit) => {
+            SAVE: async (apiClient, habit, me) => {
                 const id = habit.id
                 var response
 
-                if (id === 'new') {
+                console.log(id)
+
+                if (id === 'new' || id === null) {
                     const habitObj = habit.toAPIObj(['id'])
+                    habitObj.person = me
                     response = await apiClient.newHabit(habitObj)
                 } else {
                     const habitObj = habit.toAPIObj()
@@ -96,21 +99,23 @@ export const reducer = handleActions({
     },
 }, defaultState)
 
+const middlewareLoadHabit = (router, store) => {
+    if (router.route.startsWith('/habit/:id/edit')) {
+        const rawId = router.params.id
+        const id = (rawId === 'new') ? rawId : Number(rawId)
+        const habit = store.getState().pd.habits.get(id)
+        store.dispatch(actions.prospective.habit.copy(habit))
+    }
+}
+
 export const middleware = store => next => action => {
     const res = next(action)
     switch (action.type) {
         case 'ROUTER_LOCATION_CHANGED':
-            if (action.payload.route.startsWith('/habit/:id/edit')) {
-                const habit = store.getState().pd.habits.get(Number(action.payload.params.id))
-                store.dispatch(actions.prospective.habit.copy(habit))
-            }
+            middlewareLoadHabit(action.payload, store)
             return res
         case 'HABITS/LOAD': {
-            const state = store.getState()
-            if (state.router.route.startsWith('/habit/:id/edit')) {
-                const habit = state.pd.habits.get(Number(state.router.params.id))
-                store.dispatch(actions.prospective.habit.copy(habit))
-            }
+            middlewareLoadHabit(store.getState().router, store)
             return res
         }
         default:
