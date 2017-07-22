@@ -99,8 +99,11 @@ export const reducer = handleActions({
     },
 }, defaultState)
 
-const middlewareLoadHabit = (router, store) => {
+const middlewareLoadHabit = (router, store, oldRouter) => {
     if (router.route.startsWith('/habit/:id/edit')) {
+        if (router.pathname === oldRouter.pathname) {
+            return
+        }
         const rawId = router.params.id
         const id = (rawId === 'new') ? rawId : Number(rawId)
         const habit = store.getState().pd.habits.get(id)
@@ -109,13 +112,14 @@ const middlewareLoadHabit = (router, store) => {
 }
 
 export const middleware = store => next => action => {
+    const oldRouter = store.getState().router
     const res = next(action)
     switch (action.type) {
         case 'ROUTER_LOCATION_CHANGED':
-            middlewareLoadHabit(action.payload, store)
+            middlewareLoadHabit(action.payload, store, oldRouter)
             return res
         case 'HABITS/LOAD': {
-            middlewareLoadHabit(store.getState().router, store)
+            middlewareLoadHabit(store.getState().router, store, oldRouter)
             return res
         }
         default:
