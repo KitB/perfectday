@@ -68,6 +68,9 @@ class HabitSerializer(serializers.HyperlinkedModelSerializer):
 
         habit = models.Habit.objects.create(**validated_data)
 
+        if schedule_data['start'] == 0:
+            schedule_data['start'] = utils.int_now()
+
         schedule = models.Schedule.objects.create(habit=habit, **schedule_data)
 
         for period_data in periods_data:
@@ -82,6 +85,9 @@ class HabitSerializer(serializers.HyperlinkedModelSerializer):
         if old_schedule is not None:
             old_schedule.stop = utils.int_now()
             old_schedule.save()
+
+        if schedule_data['start'] == 0:
+            schedule_data['start'] = utils.int_now()
 
         schedule = models.Schedule.objects.create(habit=habit, **schedule_data)
 
