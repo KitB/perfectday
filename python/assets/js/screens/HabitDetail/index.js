@@ -1,24 +1,18 @@
 import React from 'react'
 
-import Paper from 'material-ui/Paper'
-
 import Header from './Header'
+import Descriptions from './Descriptions'
 import { ScheduleDisplay } from 'common/Schedule'
 
-import { BodyPane, Screen } from 'common/components'
-
-const paper = {
-    padding: '2vw',
-    position: 'relative',
-}
+import { BodyPane, Screen, Padding } from 'common/components'
 
 const Habit = () => (
     <Screen>
         <Header />
         <BodyPane>
-            <Paper style={paper} elevation={4}>
-                <ScheduleDisplay />
-            </Paper>
+            <Descriptions />
+            <Padding />
+            <ScheduleDisplay />
         </BodyPane>
     </Screen>
 )
