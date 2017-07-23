@@ -31,6 +31,7 @@
   "dependencies": {
     "gravatar": "^1.6.0",
     "immutable": "^3.8.1",
+    "json-immutable": "^0.3.0",
     "material-ui": "^1.0.0-alpha.21",
     "material-ui-icons": "^1.0.0-alpha.19",
     "numeral": "^2.0.6",

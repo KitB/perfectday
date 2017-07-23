@@ -3,7 +3,7 @@ import React from 'react'
 
 // Components
 import Typography from 'material-ui/Typography'
-import GenHeader from 'common/Header'
+import GenHeader from 'components/Header'
 
 // Active containers
 import DisplayWorth from './DisplayWorth'

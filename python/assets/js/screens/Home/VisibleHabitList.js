@@ -1,33 +1,23 @@
-import { connect } from 'react-redux'
+import { connect, compose } from 'propCompose'
 import HabitList from './HabitList'
 import { actions } from 'Store/Ducks'
-import { push } from 'redux-little-router'
 
-const mapStateToProps = state => {
-    return {
-        habits: state.pd.habits.filter(habit => habit.id !== null),
-        me: state.pd.me,
-    }
-}
+import { Push } from 'propMakers/Navigate'
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        onHabitClick: async (habit, me) => {
-            const pd = ownProps.apiClient
-            const fn = () => habit.happened_today ? pd.undoHabit(habit) : pd.doHabit(habit)
+const makeProps = (state, dispatch, previous) => ({
+    onHabitClick: async (habit) => {
+        const pd = state.pd.apiClient
+        const fn = () => habit.happened_today ? pd.undoHabit(habit) : pd.doHabit(habit)
 
-            await fn()
-            return await dispatch(actions.habits.load(pd, me.id))
-        },
-        onHabitSecondaryClick: (habitId) => {
-            dispatch(push('/habit/' + habitId))
-        }
-    }
-}
+        await fn()
+        return await dispatch(actions.habits.load(pd, state.pd.me.id))
+    },
+    onHabitSecondaryClick: (habitId) => previous.push(`/habit/${habitId}`),
+    habits: state.pd.habits.filter(habit => habit.id !== null),
+})
 
 const VisibleHabitList = connect(
-        mapStateToProps,
-        mapDispatchToProps,
+    compose(Push, makeProps)
 )(HabitList)
 
 export default VisibleHabitList

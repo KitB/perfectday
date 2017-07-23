@@ -1,12 +1,12 @@
-import { connect } from 'react-redux'
-import Avatar from 'common/Avatar'
+import { connect } from 'propCompose'
+import Avatar from 'components/Avatar'
 
-const mapStateToProps = state => ({
+const makeProps = state => ({
   email: state.pd.me.user.email,
 })
 
 const DisplayAvatar = connect(
-  mapStateToProps
+  makeProps
 )(Avatar)
 
 export default DisplayAvatar

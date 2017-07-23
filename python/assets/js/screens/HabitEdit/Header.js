@@ -1,15 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { goBack } from 'redux-little-router'
+import { connect, compose } from 'propCompose'
 
 import IconButton from 'material-ui/IconButton'
 import SaveIcon from 'material-ui-icons/Done'
 
-import { BarHeader, BarTitle } from 'common/components'
-import Back from 'common/containers/Back'
+import { BarHeader, BarTitle } from 'components'
+import Back from 'containers/Back'
 
 import { actions } from 'Store/Ducks'
+import { GoBack } from 'propMakers/Navigate'
+import { prospectiveHabit } from 'propMakers/Habit'
 
 const RawHabitHeader = ({habit, saveChanges}) => (
     <BarHeader>
@@ -28,34 +29,17 @@ RawHabitHeader.propTypes = {
     saveChanges: PropTypes.func.isRequired,
 }
 
-const mapStateToProps = state => {
-    const id = state.router.params.id
-    let habit = state.pd.habits.get(Number(id))
-    return {
-        habit: habit,
-        getProspectiveHabit: () => state.pd.prospectiveHabit,
-        apiClient: state.pd.apiClient,
-        me: state.pd.me,
-    }
-}
-
-const mapDispatchToProps = (dispatch) => ({
-    saveChanges: async (apiClient, habit, me) => {
-        dispatch(goBack())
-        await dispatch(actions.prospective.habit.save(apiClient, habit, me.url))
-        dispatch(actions.habits.load(apiClient, me.id))
+const makeProps = (state, dispatch, previous) => ({
+    saveChanges: async () => {
+        previous.goBack()
+        const me = state.pd.me
+        await dispatch(actions.prospective.habit.save(state.pd.apiClient, previous.habit, me.url))
+        dispatch(actions.habits.load(state.pd.apiClient, me.id))
     },
 })
 
-const mergeProps = (stateProps, dispatchProps) => ({
-    habit: stateProps.habit,
-    saveChanges: () => dispatchProps.saveChanges(stateProps.apiClient, stateProps.getProspectiveHabit(), stateProps.me),
-})
-
 const HabitHeader = connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
+    compose(prospectiveHabit, GoBack, makeProps)
 )(RawHabitHeader)
 
 export default HabitHeader

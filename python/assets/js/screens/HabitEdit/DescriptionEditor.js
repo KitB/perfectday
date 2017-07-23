@@ -1,11 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import { connect, compose } from 'propCompose'
 
 import Card, { CardContent, CardHeader } from 'material-ui/Card'
 import TextField from 'material-ui/TextField'
 
 import { actions } from 'Store/Ducks'
+
+import { prospectiveHabit } from 'propMakers/Habit'
 
 export const RawDescriptionEditor = ({ habit, onShortChange, onLongChange }) => (
     <Card>
@@ -40,13 +42,11 @@ RawDescriptionEditor.propTypes = {
     onLongChange: PropTypes.func.isRequired,
 }
 
-const mapStateToProps = (state) => ({
-    habit: state.pd.prospectiveHabit,
-})
-
-const mapDispatchToProps = (dispatch) => ({
+const makeProps = (state, dispatch) => ({
     onShortChange: (shortDesc) => dispatch(actions.prospective.habit.update.shortDescription.set(shortDesc)),
     onLongChange: (longDesc) => dispatch(actions.prospective.habit.update.longDescription.set(longDesc)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(RawDescriptionEditor)
+export default connect(
+    compose(prospectiveHabit, makeProps)
+)(RawDescriptionEditor)

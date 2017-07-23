@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import List from 'material-ui/List'
 import Habit from './Habit'
 
-const HabitList = ({ habits, onHabitClick, onHabitSecondaryClick, me }) => {
+const HabitList = ({ habits, onHabitClick, onHabitSecondaryClick }) => {
     return (
         <List>
             {
@@ -11,7 +11,7 @@ const HabitList = ({ habits, onHabitClick, onHabitSecondaryClick, me }) => {
                     <Habit key={key}
                         happened={habit.happened_today}
                         text={habit.short_description}
-                        onClick={(e) => onHabitClick(habit, me, e)}
+                        onClick={() => onHabitClick(habit)}
                         onSecondaryClick={() => onHabitSecondaryClick(habit.id)}
                         habitId={habit.id}
                     />
@@ -25,9 +25,6 @@ HabitList.propTypes = {
     habits: PropTypes.object.isRequired,
     onHabitClick: PropTypes.func.isRequired,
     onHabitSecondaryClick: PropTypes.func.isRequired,
-    me: PropTypes.shape({
-        id: PropTypes.number.isRequired,
-    }).isRequired,
 }
 
 export default HabitList

@@ -2,9 +2,9 @@ import React from 'react'
 
 import Header from './Header'
 import Descriptions from './Descriptions'
-import { ScheduleDisplay } from 'common/Schedule'
+import ScheduleDisplay from './ScheduleDisplay'
 
-import { BodyPane, Screen, Padding } from 'common/components'
+import { BodyPane, Screen, Padding } from 'components'
 
 const Habit = () => (
     <Screen>

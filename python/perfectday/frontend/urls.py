@@ -6,7 +6,7 @@ from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(pattern_name='home', permanent=True)),
-    url(r'^home/', views.index, name='home'),
+    url(r'^$', RedirectView.as_view(pattern_name='habits', permanent=True)),
+    url(r'^home/habits', views.index, name='habits'),
     url(r'^.*$', views.index, name='index'),
 ]

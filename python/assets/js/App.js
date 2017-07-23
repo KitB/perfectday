@@ -13,10 +13,12 @@ import PerfectDay from 'PD'
 import { fullScreen } from 'commonStyles'
 
 
-const App = ({apiClient}) => (
+const App = () => (
     <div style={{...fullScreen}}>
-        <Fragment forRoute='/home/'>
-            <Home apiClient={apiClient} />
+        <Fragment forRoute='/home'>
+            <Fragment forRoute='/habits'>
+                <Home />
+            </Fragment>
         </Fragment>
         <Fragment forRoute='/habit/:id'>
             <div>
@@ -30,9 +32,5 @@ const App = ({apiClient}) => (
         </Fragment>
     </div>
 )
-
-App.propTypes = {
-    apiClient: PropTypes.instanceOf(PerfectDay).isRequired,
-}
 
 export default App

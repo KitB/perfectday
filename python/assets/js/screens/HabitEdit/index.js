@@ -3,8 +3,8 @@ import React from 'react'
 import Header from './Header'
 import DescriptionEditor from './DescriptionEditor'
 
-import { Screen, BodyPane, Padding } from 'common/components'
-import { ScheduleEditor } from 'common/Schedule'
+import { Screen, BodyPane, Padding } from 'components'
+import ScheduleEdit from './ScheduleEdit'
 
 const HabitEdit = () => (
     <Screen>
@@ -12,7 +12,7 @@ const HabitEdit = () => (
         <BodyPane>
             <DescriptionEditor />
             <Padding />
-            <ScheduleEditor />
+            <ScheduleEdit />
         </BodyPane>
     </Screen>
 )

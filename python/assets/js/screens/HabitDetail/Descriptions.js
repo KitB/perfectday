@@ -1,9 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { connect } from 'react-redux'
-
-import { HabitRecord } from 'Store/Ducks/Habits'
+import { connect, compose } from 'propCompose'
+import { locationHabit } from 'propMakers/Habit'
 
 import Card, { CardHeader } from 'material-ui/Card'
 
@@ -21,13 +20,9 @@ RawDescriptions.propTypes = {
     longDesc: PropTypes.string.isRequired,
 }
 
-const mapStateToProps = state => {
-    const id = Number(state.router.params.id)
-    const habit = state.pd.habits.get(id) || new HabitRecord()
-    return {
-        shortDesc: habit.short_description,
-        longDesc: habit.long_description,
-    }
-}
+const makeProps = (state, dispatch, previous) => ({
+    shortDesc: previous.habit.short_description,
+    longDesc: previous.habit.long_description,
+})
 
-export default connect(mapStateToProps)(RawDescriptions)
+export default connect(compose(locationHabit, makeProps))(RawDescriptions)

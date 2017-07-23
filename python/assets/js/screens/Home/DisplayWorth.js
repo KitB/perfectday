@@ -1,14 +1,12 @@
-import { connect } from 'react-redux'
-import Currency from 'common/Currency'
+import { connect } from 'propCompose'
+import Currency from 'components/Currency'
 
-const mapStateToProps = state => {
-  return {
+const makeProps = state => ({
     value: state.pd.me.worth,
-  }
-}
+})
 
 const DisplayWorth = connect(
-  mapStateToProps,
+  makeProps,
 )(Currency)
 
 export default DisplayWorth

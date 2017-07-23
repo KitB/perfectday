@@ -6,8 +6,8 @@ import Card, {  } from 'material-ui/Card'
 
 import { Fragment } from 'redux-little-router'
 
-import Select from './Select'
-import Week from './Week'
+import Select from './ScheduleEditSelect'
+import Week from './ScheduleEditWeek'
 
 
 const weekly = 'schedule-weekly'
