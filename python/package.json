@@ -39,6 +39,7 @@
     "react-mdl": "^1.10.3",
     "react-redux": "^5.0.5",
     "react-router-dom": "^4.1.1",
+    "react-swipeable-views": "^0.12.4",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.7.1",
     "redux-actions": "^2.2.1",

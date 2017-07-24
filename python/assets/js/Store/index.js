@@ -12,12 +12,19 @@ const routes = {
         '/habits': {
             title: 'Habit List',
         },
+        '/rewards': {
+            title: 'Reward List',
+        },
     },
     '/habit/:id': {
         title: 'Habit detail: ',
         '/edit': {
             title: 'Editing habit: ',
         },
+    },
+    // No detail page for rewards
+    '/reward/:id/edit': {
+        title: 'Editing Reward: ',
     },
 }
 

@@ -1,14 +1,15 @@
 // React
 import React from 'react'
+import PropTypes from 'prop-types'
 
 // Components
 import Typography from 'material-ui/Typography'
-import Tabs, { Tab } from 'material-ui/Tabs'
 import GenHeader from 'components/Header'
 
 // Active containers
 import DisplayWorth from './DisplayWorth'
 import DisplayAvatar from './DisplayAvatar'
+import TabBar from './TabBar'
 
 // Other local
 import { centerVert } from 'commonStyles'
@@ -45,7 +46,7 @@ const classes = {
 }
 
 
-const Header = () => (
+const Header = ({ tabs }) => (
     <GenHeader>
         <div style={classes.toolbar}>
             <div style={classes.avatar}>
@@ -56,15 +57,13 @@ const Header = () => (
             </Typography>
         </div>
         <div style={classes.tabBar}>
-            <Tabs
-                index={0}
-                fullWidth
-            >
-                <Tab label='Habits' />
-                <Tab label='Rewards' />
-            </Tabs>
+            <TabBar tabs={tabs}/>
         </div>
     </GenHeader>
 )
+
+Header.propTypes = {
+    tabs: PropTypes.array.isRequired,
+}
 
 export default Header
