@@ -7,29 +7,21 @@ import childrenPropType from 'react-children-proptype'
 import { withStyles, createStyleSheet } from 'material-ui/styles'
 
 // Components
-import Paper from 'material-ui/Paper'
-
-// Other stuff
-import { centerVert } from '../commonStyles'
-
-const horizPad = '8vw'
+import AppBar from 'material-ui/AppBar'
 
 const styleSheet = createStyleSheet('PaperSheet', theme => ({
     header: {
+        position: 'relative',
         background: theme.palette.primary[500],
         height: '30vh',
-        paddingLeft: horizPad,
-        paddingRight: horizPad,
     },
 }))
 
 
 const Header = ({classes, children}) => (
-    <Paper className={classes.header} square={true} elevation={4}>
-        <div style={centerVert}>
-            {children}
-        </div>
-    </Paper>
+    <AppBar className={classes.header} square={true} elevation={4}>
+        {children}
+    </AppBar>
 )
 
 Header.propTypes = {
