@@ -21,7 +21,7 @@
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-import": "^2.6.1",
     "eslint-plugin-react": "^7.1.0",
-    "jquery": "^3.2.1",
+    "jquery": "^3.5.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "style-loader": "^0.18.2",
